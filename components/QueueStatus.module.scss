@@ -1,0 +1,226 @@
+@import '../app/variables.scss';
+
+.card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+// Loading and error states
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  gap: var(--spacing-sm);
+}
+
+.spinner {
+  color: var(--accent-primary);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.errorContainer {
+  padding: var(--spacing-md);
+}
+
+.errorIcon {
+  color: var(--error);
+}
+
+.errorText {
+  color: var(--error);
+  font-size: 13px;
+  text-align: center;
+}
+
+// Queue counts
+.countsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.countItem {
+  text-align: center;
+}
+
+.countNumber {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1;
+  margin-bottom: var(--spacing-xs);
+}
+
+.countAvailable {
+  color: var(--success);
+}
+
+.countInReview {
+  color: var(--status-being-reviewed);
+}
+
+.countLabel {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+// Currently reviewing section
+.reviewingSection {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.reviewingHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
+}
+
+.lockIcon {
+  color: var(--status-being-reviewed);
+}
+
+.reviewingLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.officerName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.timerSection {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.clockIcon {
+  color: var(--text-muted);
+}
+
+.timerText {
+  font-size: 13px;
+  font-family: $font-mono;
+  color: var(--text-muted);
+}
+
+// Action buttons
+.actionsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.primaryButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  background-color: var(--accent-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+
+  &:hover:not(:disabled) {
+    background-color: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--accent-active);
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.secondaryButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+
+  &:hover:not(:disabled) {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-active);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.buttonSpinner {
+  animation: spin 1s linear infinite;
+}
+
+// Claim error
+.claimError {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--error);
+  font-size: 13px;
+}
