@@ -48,7 +48,7 @@ export function useQueueStatus(validatorId: string | null | undefined) {
       }
 
       const data = await response.json();
-      return data.queueStatus;
+      return data;
     },
     enabled: !!validatorId,
     staleTime: 8 * 1000, // Consider fresh for 8 seconds

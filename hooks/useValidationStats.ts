@@ -40,7 +40,7 @@ export function useValidationStats() {
       }
 
       const data = await response.json();
-      return data.stats;
+      return data;
     },
     staleTime: 25 * 1000, // Consider fresh for 25 seconds
     refetchInterval: 30 * 1000, // Auto-refetch every 30 seconds

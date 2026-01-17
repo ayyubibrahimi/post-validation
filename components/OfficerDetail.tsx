@@ -93,10 +93,14 @@ export default function OfficerDetail({
     );
   }
 
-  const { officer_info, matched_officer_employment_history, other_officers_with_same_name, citations } =
-    officer.data;
+  const {
+    officer_info,
+    matched_officer_employment_history = [],
+    other_officers_with_same_name = [],
+    citations = []
+  } = officer.data || {};
 
-  const matchProbability = officer_info.match_probability * 100;
+  const matchProbability = officer_info?.match_probability ? officer_info.match_probability * 100 : 0;
   const matchColor =
     matchProbability >= 85
       ? styles.matchHigh
@@ -106,6 +110,17 @@ export default function OfficerDetail({
 
   const hasConflicts = other_officers_with_same_name.length > 0;
   const hasCitations = citations.length > 0;
+
+  // Safety check for officer_info
+  if (!officer_info) {
+    return (
+      <div className={styles.emptyState}>
+        <AlertTriangle size={48} className={styles.emptyIcon} />
+        <h2>Invalid Officer Data</h2>
+        <p>The officer data is missing or incomplete. Please try claiming another officer.</p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -309,9 +324,12 @@ function EmploymentTable({
   employments,
   isMatched,
 }: {
-  employments: EmploymentHistory[];
+  employments: EmploymentHistory[] | undefined;
   isMatched: boolean;
 }) {
+  // Safe fallback for undefined employments
+  const safeEmployments = employments || [];
+
   return (
     <div className={styles.tableContainer}>
       <table className={styles.table}>
@@ -324,7 +342,8 @@ function EmploymentTable({
           </tr>
         </thead>
         <tbody>
-          {employments.map((emp, index) => (
+          {safeEmployments.length > 0 ? (
+            safeEmployments.map((emp, index) => (
             <tr key={index} className={isMatched ? styles.matchedRow : ''}>
               <td>{emp.agency_name}</td>
               <td>{emp.start_date || 'N/A'}</td>
@@ -335,7 +354,14 @@ function EmploymentTable({
                   : 'N/A'}
               </td>
             </tr>
-          ))}
+            ))
+          ) : (
+            <tr>
+              <td colSpan={4} style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>
+                No employment history available
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
