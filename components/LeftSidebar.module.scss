@@ -1,3 +1,8 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
 .card {
   background-color: var(--bg-primary);
   border: 1px solid var(--border-medium);
@@ -6,18 +11,19 @@
   box-shadow: var(--shadow-sm);
 }
 
-.title {
+.sectionTitle {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-// Loading and error states
-.loadingContainer,
-.errorContainer {
+// Loading State
+.loadingContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -39,19 +45,10 @@
 
 .loadingText {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 11px;
 }
 
-.errorContainer {
-  padding: var(--spacing-md);
-}
-
-.errorText {
-  color: var(--error);
-  font-size: 13px;
-}
-
-// Stats grid
+// Stats Grid (2x2)
 .statsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -64,7 +61,7 @@
 }
 
 .statNumber {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1;
@@ -72,12 +69,14 @@
 }
 
 .statLabel {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--text-muted);
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-// Progress bar section
+// Progress Bar Section
 .progressSection {
   margin-bottom: var(--spacing-md);
 }
@@ -90,13 +89,15 @@
 }
 
 .progressLabel {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-muted);
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .progressPercentage {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-primary);
   font-weight: 600;
 }
@@ -114,18 +115,9 @@
   transition: width 0.3s ease;
 }
 
-// Status section
+// Status Section
 .statusSection {
   margin-bottom: var(--spacing-md);
-}
-
-.sectionTitle {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
 }
 
 .statusList {
@@ -139,7 +131,7 @@
   align-items: center;
   gap: var(--spacing-xs);
   padding: 4px 6px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   transition: background-color var(--transition-fast);
 
   &:hover {
@@ -149,23 +141,25 @@
 
 .statusLabel {
   flex: 1;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-secondary);
 }
 
 .iconCorrect {
   color: var(--status-correct);
+  flex-shrink: 0;
 }
 
 .iconIncorrect {
   color: var(--status-incorrect);
+  flex-shrink: 0;
 }
 
 .iconReview {
   color: var(--status-review);
+  flex-shrink: 0;
 }
 
-// Badges
 .badge {
   font-size: 10px;
   font-weight: 500;
@@ -190,39 +184,65 @@
   color: var(--status-review);
 }
 
-// Success rate section
-.successSection {
-  padding-top: var(--spacing-sm);
-  border-top: 1px solid var(--border-subtle);
-}
-
-.successHeader {
+// Action Buttons
+.actionButtons {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.nextButton,
+.releaseButton {
+  width: 100%;
+  display: flex;
   align-items: center;
-  margin-bottom: 4px;
-}
-
-.successLabel {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.successRate {
-  font-size: 16px;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
   font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 }
 
-.successRateHigh {
-  color: var(--success);
+.nextButton {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
+
+  &:hover:not(:disabled) {
+    background-color: rgba(59, 130, 246, 0.3);
+  }
 }
 
-.successRateMedium {
-  color: var(--warning);
+.releaseButton {
+  background-color: rgba(107, 114, 128, 0.2);
+  color: #6b7280;
+  border: 1px solid #6b7280;
+
+  &:hover:not(:disabled) {
+    background-color: rgba(107, 114, 128, 0.3);
+  }
 }
 
-.successDescription {
-  font-size: 10px;
+.noOfficersText {
+  font-size: 11px;
   color: var(--text-muted);
+  text-align: center;
+  margin-top: var(--spacing-sm);
+  font-style: italic;
 }

@@ -2,7 +2,7 @@
   background-color: var(--bg-secondary);
   border-left: 3px solid var(--accent-primary);
   border-radius: var(--radius-md);
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
   transition: all var(--transition-normal);
 
   &:hover {
@@ -13,10 +13,10 @@
 
 // Quote section
 .quote {
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 12px;
+  line-height: 1.5;
   color: var(--text-secondary);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
 }
 
 .highlighted {
@@ -41,7 +41,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  font-size: 13px;
+  font-size: 11px;
   color: var(--text-muted);
 }
 
@@ -63,9 +63,9 @@
 
 // Agency badge
 .agencyBadge {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: var(--radius-full);
   background-color: rgba(20, 184, 166, 0.15);
   color: var(--accent-primary);
@@ -83,8 +83,8 @@
 .pdfLink {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 13px;
+  gap: 3px;
+  font-size: 11px;
   color: var(--accent-primary);
   text-decoration: none;
   font-weight: 500;

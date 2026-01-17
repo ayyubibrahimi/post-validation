@@ -69,6 +69,8 @@ export async function GET(request: NextRequest) {
         .from('officer_validations')
         .select('mention_uid, data, being_reviewed_at')
         .eq('being_reviewed_by', validatorId)
+        .order('being_reviewed_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (officerError) {

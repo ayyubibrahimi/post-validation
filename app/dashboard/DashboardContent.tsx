@@ -1,16 +1,19 @@
 'use client';
 
-import React from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/DashboardLayout';
-import ProgressStats from '@/components/ProgressStats';
-import QueueStatus from '@/components/QueueStatus';
+import LeftSidebar from '@/components/LeftSidebar';
+import RightSidebar from '@/components/RightSidebar';
 import OfficerDetail from '@/components/OfficerDetail';
-import styles from './page.module.scss';
 
 /**
  * Dashboard Content - Client component with search params access
+ *
+ * Layout:
+ * - Left Sidebar: Stats + Queue + Next Officer button
+ * - Main Content: Officer detail with carousels
+ * - Right Sidebar: Validation actions
  */
 export default function DashboardContent() {
   const searchParams = useSearchParams();
@@ -33,10 +36,7 @@ export default function DashboardContent() {
     params.set('officer', mentionUid);
     router.push(`/dashboard?${params.toString()}`);
 
-    // Show success toast
-    toast.success('Officer claimed successfully', {
-      description: 'You can now review and validate this officer',
-    });
+    // Toast is handled in LeftSidebar
   };
 
   /**
@@ -71,24 +71,23 @@ export default function DashboardContent() {
 
   return (
     <DashboardLayout>
-      {/* Left Column */}
-      <div className={styles.leftColumn}>
-        <ProgressStats />
-        <QueueStatus
-          validatorId={validatorId}
-          onOfficerClaimed={handleOfficerClaimed}
-          onOfficerReleased={handleOfficerReleased}
-        />
-      </div>
+      {/* Left Sidebar - Stats, Queue, Navigation */}
+      <LeftSidebar
+        validatorId={validatorId}
+        currentOfficerUid={currentOfficerUid}
+        onOfficerClaimed={handleOfficerClaimed}
+        onOfficerReleased={handleOfficerReleased}
+      />
 
-      {/* Right Column */}
-      <div className={styles.rightColumn}>
-        <OfficerDetail
-          mentionUid={currentOfficerUid}
-          validatorId={validatorId}
-          onValidationComplete={handleValidationComplete}
-        />
-      </div>
+      {/* Main Content - Officer Details */}
+      <OfficerDetail mentionUid={currentOfficerUid} />
+
+      {/* Right Sidebar - Validation Actions */}
+      <RightSidebar
+        mentionUid={currentOfficerUid}
+        validatorId={validatorId}
+        onValidationComplete={handleValidationComplete}
+      />
     </DashboardLayout>
   );
 }

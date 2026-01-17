@@ -1,37 +1,29 @@
 'use client';
 
-import React from 'react';
+import { ReactNode } from 'react';
+import AppHeader from './AppHeader';
 import styles from './DashboardLayout.module.scss';
 
 interface DashboardLayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 /**
- * DashboardLayout - Two-column container structure
+ * DashboardLayout - Three-column layout container
  *
  * Layout:
- * - Left column: 340px fixed width (contains ProgressStats, QueueStatus)
- * - Right column: Flex 1 - fills remaining space (contains OfficerDetail)
- * - 24px gap between columns
- *
- * Usage:
- * ```tsx
- * <DashboardLayout>
- *   <div className="left-column">
- *     <ProgressStats />
- *     <QueueStatus />
- *   </div>
- *   <div className="right-column">
- *     <OfficerDetail />
- *   </div>
- * </DashboardLayout>
- * ```
+ * - Header: Full width with app title
+ * - Left Sidebar: 240px fixed (stats + queue + navigation)
+ * - Main Content: Flexible width (officer details)
+ * - Right Sidebar: 280px fixed (validation actions)
  */
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className={styles.container}>
-      {children}
+    <div className={styles.pageContainer}>
+      <AppHeader />
+      <div className={styles.contentWrapper}>
+        {children}
+      </div>
     </div>
   );
 }

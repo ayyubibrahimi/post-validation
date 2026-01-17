@@ -1,8 +1,15 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xl);
+  gap: 0;
   padding-bottom: var(--spacing-2xl);
+}
+
+// Separator between sections
+.separator {
+  height: 1px;
+  background-color: var(--border-subtle);
+  margin: var(--spacing-lg) 0;
 }
 
 // Empty State
@@ -65,24 +72,42 @@
 .sectionCard,
 .actionsCard {
   background-color: var(--bg-primary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
   box-shadow: var(--shadow-sm);
 }
 
 .sectionTitle {
-  font-size: 18px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: var(--spacing-lg);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-md);
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.subsectionTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.employmentSection {
+  margin-top: var(--spacing-md);
 }
 
 .label {
-  font-size: 12px;
+  font-size: 10px;
   color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
@@ -97,21 +122,49 @@
   margin-bottom: var(--spacing-lg);
 }
 
+.headerContent {
+  display: flex;
+  gap: var(--spacing-2xl);
+  flex: 1;
+}
+
+.inputSection,
+.matchedSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
 .inputName {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
   margin-top: var(--spacing-xs);
+}
+
+.caseId {
+  font-size: 11px;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.headerRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-sm);
 }
 
 .lockIndicator {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  font-size: 13px;
+  font-size: 11px;
   color: var(--status-being-reviewed);
   background-color: rgba(139, 92, 246, 0.1);
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: 4px 8px;
   border-radius: var(--radius-md);
 }
 
@@ -131,13 +184,13 @@
 }
 
 .officerName {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .postId {
-  font-size: 14px;
+  font-size: 12px;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', monospace;
   color: var(--text-muted);
 }
@@ -150,7 +203,7 @@
 }
 
 .probabilityValue {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 600;
 }
 
@@ -173,11 +226,11 @@
 }
 
 .agencyName {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
   background-color: var(--bg-secondary);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 6px 10px;
   border-radius: var(--radius-md);
   display: inline-block;
 }
@@ -250,8 +303,11 @@
   color: var(--success);
 }
 
-.otherOfficerSection {
-  margin-bottom: var(--spacing-lg);
+.otherOfficerCard {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
 }
 
 .otherOfficerHeader {
@@ -302,8 +358,8 @@
 
   th {
     text-align: left;
-    padding: 12px 16px;
-    font-size: 12px;
+    padding: 8px 12px;
+    font-size: 10px;
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -312,8 +368,8 @@
   }
 
   td {
-    padding: 12px 16px;
-    font-size: 13px;
+    padding: 8px 12px;
+    font-size: 12px;
     color: var(--text-secondary);
     border-bottom: 1px solid var(--border-subtle);
   }
@@ -348,6 +404,7 @@
 
 .noCitations {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
@@ -356,11 +413,28 @@
   border: 1px solid rgba(245, 158, 11, 0.3);
   border-radius: var(--radius-md);
   color: var(--warning);
-  font-size: 14px;
+  font-size: 13px;
+  text-align: center;
+
+  p {
+    margin: 0;
+  }
 }
 
 .warningIcon {
   color: var(--warning);
+}
+
+.documentLink {
+  margin-top: var(--spacing-xs);
+  color: var(--accent-primary);
+  text-decoration: underline;
+  font-size: 12px;
+  transition: color var(--transition-fast);
+
+  &:hover {
+    color: var(--accent-hover);
+  }
 }
 
 // Validation Actions

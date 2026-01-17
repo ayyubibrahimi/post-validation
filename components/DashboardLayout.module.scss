@@ -1,26 +1,94 @@
-.container {
+.pageContainer {
   display: flex;
-  gap: var(--spacing-xl); // 24px
-  height: 100vh;
-  padding: var(--spacing-xl);
+  flex-direction: column;
+  min-height: 100vh;
   background-color: var(--bg-app);
-  overflow: hidden;
+}
 
-  // Left column (fixed width)
-  :global(.left-column) {
-    width: 340px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md); // 16px
-    overflow-y: auto;
-    overflow-x: hidden;
+.contentWrapper {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 240px minmax(500px, 1fr) 340px;
+  gap: var(--spacing-xl);
+  padding: var(--spacing-xl);
+  max-width: 1800px;
+  width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+// Left sidebar column
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  overflow-y: auto;
+  max-height: calc(100vh - 80px);
+}
+
+// Main content column (scrollable)
+.mainColumn {
+  overflow-y: auto;
+  max-height: calc(100vh - 80px);
+  padding-right: var(--spacing-sm);
+}
+
+// Right sidebar column (sticky)
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  position: sticky;
+  top: var(--spacing-xl);
+  height: fit-content;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+
+// Custom scrollbar for columns
+.mainColumn::-webkit-scrollbar,
+.leftColumn::-webkit-scrollbar,
+.rightColumn::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mainColumn::-webkit-scrollbar-track,
+.leftColumn::-webkit-scrollbar-track,
+.rightColumn::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mainColumn::-webkit-scrollbar-thumb,
+.leftColumn::-webkit-scrollbar-thumb,
+.rightColumn::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 3px;
+
+  &:hover {
+    background: var(--border-active);
+  }
+}
+
+// Responsive: Stack on smaller screens
+@media (max-width: 1400px) {
+  .contentWrapper {
+    grid-template-columns: 220px 1fr 300px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .contentWrapper {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
   }
 
-  // Right column (fills remaining space)
-  :global(.right-column) {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+  .leftColumn,
+  .mainColumn,
+  .rightColumn {
+    max-height: none;
+  }
+
+  .rightColumn {
+    position: static;
   }
 }

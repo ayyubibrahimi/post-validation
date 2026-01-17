@@ -29,15 +29,22 @@ export interface OfficerInfo {
 }
 
 /**
- * Employment history record
+ * Employment history record (actual database structure with post_ prefix)
  */
 export interface EmploymentHistory {
-  agency_name: string;
-  start_date: string;
-  end_date?: string;
-  duration_days?: number;
-  separation_reason?: string;
-  post_id?: string;
+  post_agency_name: string;
+  post_start_date: string;
+  post_end_date?: string | null;
+  post_separation_reason?: string | null;
+  post_person_nbr?: string;
+  post_first_name?: string;
+  post_middle_name?: string | null;
+  post_last_name?: string;
+  // Additional fields that may be present
+  state?: string;
+  county?: string;
+  post_suffix?: string | null;
+  post_agency_type?: string;
 }
 
 /**
@@ -68,11 +75,8 @@ export interface ValidationMetadata {
 export interface OfficerValidationData {
   officer_info: OfficerInfo;
   matched_officer_employment_history: EmploymentHistory[];
-  other_officers_with_same_name: Array<{
-    post_id: string;
-    officer_name: string;
-    employment_history: EmploymentHistory[];
-  }>;
+  // other_officers_with_same_name is a flat array of employment records, not nested
+  other_officers_with_same_name: EmploymentHistory[];
   citations: Citation[];
   citation_count: number;
   validation: ValidationMetadata;
