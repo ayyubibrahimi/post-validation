@@ -6,43 +6,45 @@
 }
 
 .contentWrapper {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 240px minmax(500px, 1fr) 340px;
-  gap: var(--spacing-xl);
-  padding: var(--spacing-xl);
-  max-width: 1800px;
+  display: flex;
   width: 100%;
-  margin: 0 auto;
+  height: 100vh;
   overflow: hidden;
 }
 
 // Left sidebar column
 .leftColumn {
+  width: 280px;
+  min-width: 280px;
+  max-width: 280px;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
   overflow-y: auto;
-  max-height: calc(100vh - 80px);
+  height: 100vh;
+  border-right: 1px solid var(--border-subtle);
 }
 
 // Main content column (scrollable)
 .mainColumn {
+  flex: 1;
+  min-width: 0; // Important: allows flex item to shrink below content size
   overflow-y: auto;
-  max-height: calc(100vh - 80px);
-  padding-right: var(--spacing-sm);
+  overflow-x: hidden;
+  height: 100vh;
+  padding: var(--spacing-xl);
 }
 
-// Right sidebar column (sticky)
+// Right sidebar column
 .rightColumn {
+  width: 340px;
+  min-width: 340px;
+  max-width: 340px;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
-  position: sticky;
-  top: var(--spacing-xl);
-  height: fit-content;
-  max-height: calc(100vh - 80px);
+  height: 100vh;
   overflow-y: auto;
+  border-left: 1px solid var(--border-subtle);
+  padding: var(--spacing-xl);
 }
 
 // Custom scrollbar for columns

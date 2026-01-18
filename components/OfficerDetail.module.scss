@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding-bottom: var(--spacing-2xl);
 }
 
 // Separator between sections
@@ -67,15 +66,19 @@
   color: var(--text-muted);
 }
 
-// Card Styles
+// Card Styles - Flattened design with borders only
 .headerCard,
 .sectionCard,
 .actionsCard {
-  background-color: var(--bg-primary);
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-lg);
-  box-shadow: var(--shadow-sm);
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: var(--spacing-lg) 0;
+  margin-bottom: var(--spacing-lg);
+
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .sectionTitle {
@@ -114,125 +117,135 @@
   letter-spacing: 0.5px;
 }
 
-// Header Card
-.headerTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--spacing-lg);
+// Header Card - Reorganized Layout
+// Section: Input Officer Information
+.inputOfficerSection {
+  padding-bottom: var(--spacing-lg);
 }
 
-.headerContent {
-  display: flex;
-  gap: var(--spacing-2xl);
-  flex: 1;
+.sectionHeading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-.inputSection,
-.matchedSection {
-  flex: 1;
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md) var(--spacing-xl);
+}
+
+.infoItem {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 4px;
 }
 
 .inputName {
   font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
-  margin-top: var(--spacing-xs);
 }
 
 .caseId {
   font-size: 11px;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
   color: var(--text-muted);
-  margin-top: 4px;
 }
 
-.headerRight {
+.mentionedAgencies {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+// Divider between sections
+.sectionDivider {
+  height: 1px;
+  background-color: var(--border-medium);
+  margin: var(--spacing-lg) 0;
+}
+
+// Section: Matched POST Officer
+.matchedOfficerSection {
+  padding-top: var(--spacing-lg);
+}
+
+.matchedHeader {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--spacing-sm);
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
 }
 
 .lockIndicator {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  font-size: 11px;
+  font-size: 10px;
   color: var(--status-being-reviewed);
   background-color: rgba(139, 92, 246, 0.1);
   padding: 4px 8px;
   border-radius: var(--radius-md);
+  font-weight: 500;
 }
 
-.matchInfo {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: var(--spacing-xl);
-  margin-bottom: var(--spacing-lg);
-  padding-bottom: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-subtle);
+.matchedOfficerInfo {
+  margin-bottom: var(--spacing-md);
 }
 
-.matchedName {
+.officerNameRow {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.probabilityBadge {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
 }
 
 .officerName {
   font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
+  margin-bottom: 4px;
 }
 
 .postId {
-  font-size: 12px;
+  font-size: 11px;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', monospace;
   color: var(--text-muted);
 }
 
-.probability {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  text-align: right;
-}
-
-.probabilityValue {
-  font-size: 22px;
-  font-weight: 600;
-}
-
 .matchHigh {
+  background-color: rgba(34, 197, 94, 0.15);
   color: var(--match-high);
 }
 
 .matchMedium {
+  background-color: rgba(245, 158, 11, 0.15);
   color: var(--match-medium);
 }
 
 .matchLow {
+  background-color: rgba(239, 68, 68, 0.15);
   color: var(--match-low);
-}
-
-.agency {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
 }
 
 .agencyName {
   font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-  background-color: var(--bg-secondary);
-  padding: 6px 10px;
-  border-radius: var(--radius-md);
-  display: inline-block;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 // Employment Comparison

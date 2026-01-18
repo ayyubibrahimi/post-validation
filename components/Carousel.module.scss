@@ -23,6 +23,7 @@
   align-items: center;
   gap: var(--spacing-sm);
   min-height: 150px;
+  max-height: 400px; // Prevent overflow on large content
 }
 
 .arrowButton {
@@ -58,6 +59,8 @@
 .itemContainer {
   flex: 1;
   animation: fadeIn 0.2s ease-in-out;
+  max-height: 350px; // Constrain item height
+  overflow: hidden; // Hide overflow (items handle their own scrolling)
 }
 
 @keyframes fadeIn {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Lock, AlertTriangle, Loader2, ArrowRight, CheckCircle } from 'lucide-react';
+import { Lock, AlertTriangle, Loader2, ArrowRight } from 'lucide-react';
 import { useOfficerDetail } from '@/hooks';
 import Carousel from './Carousel';
 import CitationCard from './CitationCard';
@@ -48,7 +48,6 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
   const {
     officer_info,
     matched_officer_employment_history = [],
-    other_officers_with_same_name = [],
     citations = [],
   } = officer.data || {};
 
@@ -73,73 +72,76 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
       ? styles.matchMedium
       : styles.matchLow;
 
-  // Group other officers by POST ID
-  const groupedOtherOfficers = other_officers_with_same_name.reduce((acc, emp) => {
-    const postId = emp.post_person_nbr || 'Unknown';
-    if (!acc[postId]) {
-      acc[postId] = {
-        post_id: postId,
-        officer_name: `${emp.post_first_name || ''} ${emp.post_middle_name || ''} ${
-          emp.post_last_name || ''
-        }`.trim(),
-        employment_history: [],
-      };
-    }
-    acc[postId].employment_history.push(emp);
-    return acc;
-  }, {} as Record<string, { post_id: string; officer_name: string; employment_history: EmploymentHistory[] }>);
-
-  const otherOfficersArray = Object.values(groupedOtherOfficers);
-
   return (
     <div className={styles.container}>
-      {/* Combined Officer Card - Input and Matched POST Officer */}
+      {/* Officer Information Card */}
       <div className={styles.headerCard}>
-        <div className={styles.headerTop}>
-          <div className={styles.headerContent}>
-            <div className={styles.inputSection}>
-              <div className={styles.label}>Input Officer Name</div>
+        {/* Section 1: Input Officer Information (from case) */}
+        <div className={styles.inputOfficerSection}>
+          <h3 className={styles.sectionHeading}>Input Officer Information</h3>
+
+          <div className={styles.infoGrid}>
+            <div className={styles.infoItem}>
+              <div className={styles.label}>Officer Name (from case)</div>
               <div className={styles.inputName}>
                 {officer_info.first_name} {officer_info.middle_name} {officer_info.last_name}
               </div>
-              <div className={styles.caseId}>Case: {officer_info.provisional_case_name}</div>
             </div>
 
-            <div className={styles.matchedSection}>
-              <div className={styles.label}>Matched POST Officer</div>
-              <div className={styles.officerName}>
-                {officer_info.first_name} {officer_info.middle_name} {officer_info.last_name}
+            <div className={styles.infoItem}>
+              <div className={styles.label}>Case ID</div>
+              <div className={styles.caseId}>{officer_info.provisional_case_name}</div>
+            </div>
+
+            <div className={styles.infoItem}>
+              <div className={styles.label}>Officer Matched to Agency</div>
+              <div className={styles.agencyName}>{officer_info.matched_agency}</div>
+            </div>
+
+            <div className={styles.infoItem}>
+              <div className={styles.label}>Agencies Mentioned in Case Documents</div>
+              <div className={styles.mentionedAgencies}>
+                {officer_info.mentioned_agencies || 'None'}
               </div>
-              <div className={styles.postId}>POST ID: {officer_info.matched_post_id}</div>
             </div>
           </div>
+        </div>
 
-          <div className={styles.headerRight}>
-            <div className={styles.probability}>
-              <span className={styles.label}>Match Probability</span>
-              <div className={`${styles.probabilityValue} ${matchColor}`}>
-                {matchProbability.toFixed(1)}%
-              </div>
-            </div>
+        {/* Divider */}
+        <div className={styles.sectionDivider} />
+
+        {/* Section 2: Matched POST Officer (candidate) */}
+        <div className={styles.matchedOfficerSection}>
+          <div className={styles.matchedHeader}>
+            <h3 className={styles.sectionHeading}>Matched POST Officer</h3>
             <div className={styles.lockIndicator}>
-              <Lock size={16} />
+              <Lock size={14} />
               <span>Assigned</span>
             </div>
           </div>
-        </div>
 
-        <div className={styles.agency}>
-          <span className={styles.label}>Agency</span>
-          <div className={styles.agencyName}>{officer_info.matched_agency}</div>
-        </div>
+          <div className={styles.matchedOfficerInfo}>
+            <div className={styles.officerNameRow}>
+              <div>
+                <div className={styles.officerName}>
+                  {officer_info.first_name} {officer_info.middle_name} {officer_info.last_name}
+                </div>
+                <div className={styles.postId}>POST ID: {officer_info.matched_post_id}</div>
+              </div>
+              <div className={`${styles.probabilityBadge} ${matchColor}`}>
+                {matchProbability.toFixed(1)}% match
+              </div>
+            </div>
+          </div>
 
-        <div className={styles.employmentSection}>
-          <h3 className={styles.subsectionTitle}>Employment History</h3>
-          {matched_officer_employment_history.length > 0 ? (
-            <EmploymentTable employments={matched_officer_employment_history} isMatched={true} />
-          ) : (
-            <div className={styles.noData}>No employment history available</div>
-          )}
+          <div className={styles.employmentSection}>
+            <h4 className={styles.subsectionTitle}>Employment History</h4>
+            {matched_officer_employment_history.length > 0 ? (
+              <EmploymentTable employments={matched_officer_employment_history} isMatched={true} />
+            ) : (
+              <div className={styles.noData}>No employment history available</div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -149,7 +151,7 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
       {/* Citations - Carousel (moved up) */}
       <div className={styles.sectionCard}>
         <h2 className={styles.sectionTitle}>
-          Citations ({citations.length})
+          Supporting Citations from Documents ({citations.length})
           {citations.length === 0 && (
             <span className={styles.warningBadge}>
               <AlertTriangle size={14} />
@@ -163,6 +165,7 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
             items={citations}
             renderItem={(citation) => <CitationCard citation={citation} />}
             emptyState={null}
+            controlsPosition="bottom"
           />
         ) : (
           <div className={styles.noCitations}>

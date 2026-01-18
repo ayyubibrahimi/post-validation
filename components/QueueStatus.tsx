@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Clock, Lock, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { useQueueStatus, useClaimOfficer, useReleaseOfficer } from '@/hooks';
+import { toast } from 'sonner';
 import styles from './QueueStatus.module.scss';
 
 interface QueueStatusProps {
@@ -45,6 +46,10 @@ export default function QueueStatus({
       {
         onSuccess: (data) => {
           if (data.officer) {
+            // Show toast if previous officer was auto-released
+            if (data.autoReleased) {
+              toast.info('Previous officer automatically released');
+            }
             onOfficerClaimed?.(data.officer.mention_uid);
           } else {
             setClaimError('No officers available for review');
@@ -149,7 +154,8 @@ export default function QueueStatus({
         <button
           className={styles.primaryButton}
           onClick={handleClaimOfficer}
-          disabled={isReviewing || claimOfficer.isPending}
+          disabled={claimOfficer.isPending}
+          title={isReviewing ? 'Will auto-release current officer' : 'Claim next officer'}
         >
           {claimOfficer.isPending ? (
             <>
@@ -158,7 +164,7 @@ export default function QueueStatus({
             </>
           ) : (
             <>
-              Get Next Officer
+              {isReviewing ? 'Get Next Officer' : 'Get Next Officer'}
               <ArrowRight size={16} />
             </>
           )}

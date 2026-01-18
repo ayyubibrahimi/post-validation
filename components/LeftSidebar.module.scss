@@ -1,14 +1,15 @@
 .sidebar {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .card {
-  background-color: var(--bg-primary);
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md);
-  box-shadow: var(--shadow-sm);
+  // Flat design - no background difference, just borders
+  background-color: transparent;
+  border-right: 1px solid var(--border-subtle);
+  padding: var(--spacing-lg);
+  height: 100%;
 }
 
 .sectionTitle {
@@ -182,6 +183,58 @@
 .badgeReview {
   background-color: rgba(59, 130, 246, 0.15);
   color: var(--status-review);
+}
+
+// Navigation Section
+.navigationSection {
+  margin-bottom: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.navigationLabel {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.navigationButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xs);
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: 8px 12px;
+  background-color: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background-color: var(--bg-secondary);
+    border-color: var(--accent-primary);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
 }
 
 // Action Buttons

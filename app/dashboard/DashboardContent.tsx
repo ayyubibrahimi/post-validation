@@ -1,6 +1,7 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/DashboardLayout';
 import LeftSidebar from '@/components/LeftSidebar';
@@ -12,7 +13,7 @@ import OfficerDetail from '@/components/OfficerDetail';
  *
  * Layout:
  * - Left Sidebar: Stats + Queue + Next Officer button
- * - Main Content: Officer detail with carousels
+ * - Main Content: Officer detail with carousels and navigation
  * - Right Sidebar: Validation actions
  */
 export default function DashboardContent() {
@@ -24,6 +25,59 @@ export default function DashboardContent() {
 
   // Hardcoded validator ID (in production, this would come from auth/session)
   const validatorId = 'validator_001';
+
+  // Track navigation history of viewed officers
+  const [officerHistory, setOfficerHistory] = useState<string[]>([]);
+  const [currentIndex, setCurrentIndex] = useState<number>(-1);
+  const lastProcessedOfficer = useRef<string | null>(null);
+
+  // Clear all stale locks on mount
+  useEffect(() => {
+    const clearStaleLocks = async () => {
+      try {
+        const response = await fetch('/api/officers/clear-locks', {
+          method: 'POST',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Cleared stale locks on mount:', data.clearedCount);
+        }
+      } catch (error) {
+        console.error('Failed to clear stale locks:', error);
+      }
+    };
+
+    clearStaleLocks();
+  }, []); // Run once on mount
+
+  // Update history when officer changes
+  useEffect(() => {
+    if (!currentOfficerUid || currentOfficerUid === lastProcessedOfficer.current) {
+      return;
+    }
+
+    lastProcessedOfficer.current = currentOfficerUid;
+
+    setOfficerHistory(prev => {
+      // If we're not at the end of history, clear forward history
+      const newHistory = currentIndex >= 0 && currentIndex < prev.length - 1
+        ? prev.slice(0, currentIndex + 1)
+        : prev;
+
+      // Add new officer to history
+      return [...newHistory, currentOfficerUid];
+    });
+
+    setCurrentIndex(prev => {
+      if (prev >= 0 && prev < officerHistory.length - 1) {
+        // We were in the middle, now we're at the new end
+        return prev + 1;
+      }
+      // We were at the end or start, move forward
+      return prev + 1;
+    });
+  }, [currentOfficerUid]);
 
   /**
    * Handle successful officer claim
@@ -69,6 +123,46 @@ export default function DashboardContent() {
     });
   };
 
+  /**
+   * Navigate to previous officer in history
+   */
+  const handlePreviousOfficer = useCallback(() => {
+    if (currentIndex > 0) {
+      const previousIndex = currentIndex - 1;
+      const previousOfficerUid = officerHistory[previousIndex];
+
+      // Update ref to prevent adding to history again
+      lastProcessedOfficer.current = previousOfficerUid;
+      setCurrentIndex(previousIndex);
+
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('officer', previousOfficerUid);
+      router.push(`/dashboard?${params.toString()}`);
+    }
+  }, [currentIndex, officerHistory, router, searchParams]);
+
+  /**
+   * Navigate to next officer in history (only if forward history exists)
+   */
+  const handleNextInHistory = useCallback(() => {
+    if (currentIndex < officerHistory.length - 1) {
+      const nextIndex = currentIndex + 1;
+      const nextOfficerUid = officerHistory[nextIndex];
+
+      // Update ref to prevent adding to history again
+      lastProcessedOfficer.current = nextOfficerUid;
+      setCurrentIndex(nextIndex);
+
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('officer', nextOfficerUid);
+      router.push(`/dashboard?${params.toString()}`);
+    }
+  }, [currentIndex, officerHistory, router, searchParams]);
+
+  // Check if navigation is available
+  const canGoBack = currentIndex > 0;
+  const canGoForward = currentIndex < officerHistory.length - 1;
+
   return (
     <DashboardLayout>
       {/* Left Sidebar - Stats, Queue, Navigation */}
@@ -77,6 +171,8 @@ export default function DashboardContent() {
         currentOfficerUid={currentOfficerUid}
         onOfficerClaimed={handleOfficerClaimed}
         onOfficerReleased={handleOfficerReleased}
+        onPrevious={handlePreviousOfficer}
+        canGoBack={canGoBack}
       />
 
       {/* Main Content - Officer Details */}

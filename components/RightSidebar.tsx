@@ -132,7 +132,7 @@ export default function RightSidebar({
         <div className={styles.card}>
           <h3 className={styles.sectionTitle}>
             <Users size={14} />
-            Other Officers
+            Officers who share a name
             {otherOfficersArray.length > 0 && (
               <span className={styles.countBadge}>{otherOfficersArray.length}</span>
             )}

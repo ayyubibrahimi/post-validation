@@ -43,13 +43,21 @@ export function useOfficerDetail(mentionUid: string | null | undefined) {
         return cachedData;
       }
 
-      // If not in cache, return null
-      // In production, you might want to fetch from a GET endpoint here
+      // If not in cache, fetch from database
+      try {
+        const response = await fetch(`/api/officers/${mentionUid}`);
+        if (response.ok) {
+          const data = await response.json();
+          return data.officer;
+        }
+      } catch (error) {
+        console.error('Failed to fetch officer:', error);
+      }
+
       return null;
     },
     enabled: !!mentionUid,
-    staleTime: Infinity, // Data doesn't change once claimed until validated
-    refetchOnWindowFocus: false, // No need to refetch
-    refetchOnMount: false, // No need to refetch
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 }

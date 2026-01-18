@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Loader2, CheckCircle, XCircle, Eye, X } from 'lucide-react';
+import { ArrowRight, Loader2, CheckCircle, XCircle, Eye, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useClaimOfficer, useReleaseOfficer, useValidationStats, useQueueStatus } from '@/hooks';
 import styles from './LeftSidebar.module.scss';
 import { toast } from 'sonner';
@@ -10,6 +10,8 @@ interface LeftSidebarProps {
   currentOfficerUid: string | null;
   onOfficerClaimed: (mentionUid: string) => void;
   onOfficerReleased: () => void;
+  onPrevious?: () => void;
+  canGoBack?: boolean;
 }
 
 /**
@@ -24,6 +26,8 @@ export default function LeftSidebar({
   currentOfficerUid,
   onOfficerClaimed,
   onOfficerReleased,
+  onPrevious,
+  canGoBack = false,
 }: LeftSidebarProps) {
   const { data: stats, isLoading: statsLoading } = useValidationStats();
   const { data: queue } = useQueueStatus(validatorId);
@@ -32,20 +36,16 @@ export default function LeftSidebar({
 
   const handleNextOfficer = async () => {
     try {
-      // Step 1: Release current officer if reviewing one
-      if (currentOfficerUid) {
-        await releaseOfficer.mutateAsync({
-          mentionUid: currentOfficerUid,
-          validatorId,
-        });
-      }
-
-      // Step 2: Claim next available officer
+      // Claim next available officer (auto-releases current if needed)
       const result = await claimOfficer.mutateAsync({ validatorId });
 
       if (result.officer) {
         onOfficerClaimed(result.officer.mention_uid);
-        toast.success('Moved to next officer');
+        if (result.autoReleased) {
+          toast.success('Previous officer skipped, viewing next');
+        } else {
+          toast.success('Viewing next officer');
+        }
       } else {
         toast.info('No more officers available for review');
       }
@@ -152,36 +152,35 @@ export default function LeftSidebar({
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className={styles.actionButtons}>
-              <button
-                className={styles.nextButton}
-                onClick={handleNextOfficer}
-                disabled={isLoading || !hasAvailableOfficers}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 size={16} className={styles.spinner} />
-                    Loading...
-                  </>
-                ) : (
-                  <>
-                    Next Officer
-                    <ArrowRight size={16} />
-                  </>
-                )}
-              </button>
-
-              {currentOfficerUid && (
+            {/* Navigation Controls */}
+            <div className={styles.navigationSection}>
+              <div className={styles.navigationLabel}>Officer Navigation</div>
+              <div className={styles.navigationButtons}>
                 <button
-                  className={styles.releaseButton}
-                  onClick={handleReleaseOfficer}
-                  disabled={isLoading}
+                  className={styles.navButton}
+                  onClick={onPrevious}
+                  disabled={!canGoBack || isLoading}
+                  title="Previous Officer"
                 >
-                  <X size={16} />
-                  Release Officer
+                  <ChevronLeft size={16} />
+                  Previous
                 </button>
-              )}
+                <button
+                  className={styles.navButton}
+                  onClick={handleNextOfficer}
+                  disabled={isLoading || !hasAvailableOfficers}
+                  title="Next Officer"
+                >
+                  {isLoading ? (
+                    <Loader2 size={16} className={styles.spinner} />
+                  ) : (
+                    <>
+                      Next
+                      <ChevronRight size={16} />
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
             {!hasAvailableOfficers && !isLoading && (

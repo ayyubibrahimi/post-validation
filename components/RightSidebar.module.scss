@@ -1,17 +1,14 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
-  position: sticky;
-  top: var(--spacing-xl);
+  gap: var(--spacing-lg);
 }
 
 .card {
-  background-color: var(--bg-primary);
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md);
-  box-shadow: var(--shadow-sm);
+  // Flat design - no background difference, no shadows
+  background-color: transparent;
+  border: none;
+  padding: 0;
 }
 
 .sectionTitle {

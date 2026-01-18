@@ -25,6 +25,7 @@ export interface OfficerInfo {
   middle_name?: string;
   last_name: string;
   matched_agency: string;
+  mentioned_agencies?: string;
   total_employment_stints: number;
 }
 
@@ -114,6 +115,7 @@ export interface ClaimOfficerResponse {
   success: boolean;
   officer: OfficerValidation | null;
   message?: string;
+  autoReleased?: boolean; // True if a previous officer was auto-released
 }
 
 /**
