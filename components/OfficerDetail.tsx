@@ -1,6 +1,6 @@
 'use client';
 
-import { Lock, AlertTriangle, Loader2, ArrowRight } from 'lucide-react';
+import { Lock, AlertTriangle, Loader2, ArrowRight, Calendar, Clock } from 'lucide-react';
 import { useOfficerDetail } from '@/hooks';
 import Carousel from './Carousel';
 import CitationCard from './CitationCard';
@@ -49,6 +49,9 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
     officer_info,
     matched_officer_employment_history = [],
     citations = [],
+    csv_incident_date,
+    csv_citations,
+    csv_enriched_at,
   } = officer.data || {};
 
   // Safety check for officer_info
@@ -72,6 +75,36 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
       ? styles.matchMedium
       : styles.matchLow;
 
+  // Format incident date for display
+  const formatIncidentDate = (dateString: string | null) => {
+    if (!dateString) return null;
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  // Format enrichment timestamp
+  const formatEnrichedAt = (timestamp: string | null) => {
+    if (!timestamp) return null;
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch {
+      return timestamp;
+    }
+  };
+
   return (
     <div className={styles.container}>
       {/* Officer Information Card */}
@@ -92,6 +125,16 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
               <div className={styles.label}>Case ID</div>
               <div className={styles.caseId}>{officer_info.provisional_case_name}</div>
             </div>
+
+            {csv_incident_date && (
+              <div className={styles.infoItem}>
+                <div className={styles.label}>Incident Date</div>
+                <div className={styles.incidentDate}>
+                  <Calendar size={14} />
+                  {formatIncidentDate(csv_incident_date)}
+                </div>
+              </div>
+            )}
 
             <div className={styles.infoItem}>
               <div className={styles.label}>Officer Matched to Agency</div>
@@ -148,10 +191,10 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
       {/* Separator */}
       <div className={styles.separator} />
 
-      {/* Citations - Carousel (moved up) */}
+      {/* Agency Citations - Carousel */}
       <div className={styles.sectionCard}>
         <h2 className={styles.sectionTitle}>
-          Supporting Citations from Documents ({citations.length})
+          Agency Employment Citations ({citations.length})
           {citations.length === 0 && (
             <span className={styles.warningBadge}>
               <AlertTriangle size={14} />
@@ -163,7 +206,7 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
         {citations.length > 0 ? (
           <Carousel
             items={citations}
-            renderItem={(citation) => <CitationCard citation={citation} />}
+            renderItem={(citation) => <CitationCard citation={citation} type="agency" />}
             emptyState={null}
             controlsPosition="bottom"
           />
@@ -184,6 +227,33 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
           </div>
         )}
       </div>
+
+      {/* Incident Date Citations - Carousel (if available) */}
+      {csv_citations && csv_citations.length > 0 && (
+        <>
+          {/* Separator */}
+          <div className={styles.separator} />
+
+          <div className={styles.sectionCard}>
+            <h2 className={styles.sectionTitle}>
+              Incident Date Citations ({csv_citations.length})
+              {csv_enriched_at && (
+                <span className={styles.enrichedBadge}>
+                  <Clock size={12} />
+                  Enriched {formatEnrichedAt(csv_enriched_at)}
+                </span>
+              )}
+            </h2>
+
+            <Carousel
+              items={csv_citations}
+              renderItem={(citation) => <CitationCard citation={citation} type="incident" />}
+              emptyState={null}
+              controlsPosition="bottom"
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 // ============================================================================
-// Officer Validation Dashboard - Dark Theme Styles
+// Officer Validation Dashboard - Light Theme Styles
 // ============================================================================
 
 // System font stacks
@@ -7,35 +7,35 @@ $font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', '
 $font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', monospace;
 
 // ============================================================================
-// CSS Variables - Dark Theme Palette
+// CSS Variables - Light Theme Palette
 // ============================================================================
 
 :root {
   // ========================================
   // Backgrounds
   // ========================================
-  --bg-app: #0d0d0d;              // Application background (darkest)
-  --bg-primary: #1a1a1a;          // Main content areas, cards
-  --bg-secondary: #262626;        // Hover states, secondary cards
-  --bg-tertiary: #2d2d2d;         // Active/selected states
-  --bg-input: #1f1f1f;            // Form inputs, search fields
+  --bg-app: #f9fafb;              // Application background (lightest)
+  --bg-primary: #ffffff;          // Main content areas, cards
+  --bg-secondary: #f3f4f6;        // Hover states, secondary cards
+  --bg-tertiary: #e5e7eb;         // Active/selected states
+  --bg-input: #ffffff;            // Form inputs, search fields
 
   // ========================================
   // Borders
   // ========================================
-  --border-subtle: #2a2a2a;       // Card borders, dividers
-  --border-medium: #333333;       // Section separators
-  --border-focus: #404040;        // Focused input borders
-  --border-active: #4a4a4a;       // Active/selected borders
+  --border-subtle: #e5e7eb;       // Card borders, dividers
+  --border-medium: #d1d5db;       // Section separators
+  --border-focus: #9ca3af;        // Focused input borders
+  --border-active: #6b7280;       // Active/selected borders
 
   // ========================================
   // Text
   // ========================================
-  --text-primary: #ffffff;        // Headings, primary content
-  --text-secondary: #d4d4d4;      // Body text, descriptions
-  --text-muted: #a3a3a3;          // Metadata, timestamps, labels
-  --text-disabled: #737373;       // Disabled states
-  --text-placeholder: #666666;    // Input placeholders
+  --text-primary: #111827;        // Headings, primary content
+  --text-secondary: #374151;      // Body text, descriptions
+  --text-muted: #6b7280;          // Metadata, timestamps, labels
+  --text-disabled: #9ca3af;       // Disabled states
+  --text-placeholder: #9ca3af;    // Input placeholders
 
   // ========================================
   // Status Colors
@@ -78,9 +78,9 @@ $font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', 
   // ========================================
   // Shadows & Elevation
   // ========================================
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
 
   // ========================================
   // Border Radius
@@ -169,7 +169,7 @@ p {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-app);
+  background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -219,7 +219,7 @@ p {
 // ============================================================================
 
 ::selection {
-  background-color: rgba(20, 184, 166, 0.3);
+  background-color: rgba(20, 184, 166, 0.2);
   color: var(--text-primary);
 }
 

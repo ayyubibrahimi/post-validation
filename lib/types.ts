@@ -49,7 +49,7 @@ export interface EmploymentHistory {
 }
 
 /**
- * Citation evidence from documents
+ * Citation evidence from documents (agency citations)
  */
 export interface Citation {
   file_name: string;
@@ -58,6 +58,19 @@ export interface Citation {
   quote: string;
   agency_name: string;
   blob_url: string;
+}
+
+/**
+ * Incident date citation (different structure from agency citations)
+ */
+export interface IncidentCitation {
+  filename: string;
+  sha1: string;
+  gdrive_id: string;
+  gdrive_url: string;
+  page_number: number;
+  quote: string;
+  validator_reasoning: string;
 }
 
 /**
@@ -81,6 +94,15 @@ export interface OfficerValidationData {
   citations: Citation[];
   citation_count: number;
   validation: ValidationMetadata;
+
+  // Incident date fields (enriched data)
+  csv_incident_date: string | null;
+  csv_incident_year: string | null;
+  csv_incident_month: string | null;
+  csv_incident_day: string | null;
+  csv_citations: IncidentCitation[] | null;
+  csv_blob_urls: string | null;
+  csv_enriched_at: string | null;
 }
 
 /**

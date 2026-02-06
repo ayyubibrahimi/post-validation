@@ -164,6 +164,15 @@
   font-style: italic;
 }
 
+.incidentDate {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3b82f6;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 // Divider between sections
 .sectionDivider {
   height: 1px;
@@ -296,6 +305,21 @@
   color: var(--error);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.enrichedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: var(--spacing-sm);
 }
 
 .noConflicts {

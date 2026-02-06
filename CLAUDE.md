@@ -1,7 +1,7 @@
 # Officer Validation Dashboard - Technical Documentation
 
-**Last Updated:** 2026-01-17
-**Status:** MVP Complete (Phases 1-5)
+**Last Updated:** 2026-02-05
+**Status:** MVP Complete (Phases 1-5) + Incident Data Enrichment
 **Framework:** Next.js 14+ (App Router) with TypeScript
 
 ---
@@ -285,44 +285,90 @@ WHERE being_reviewed_at IS NOT NULL;
     middle_name?: string,
     last_name: string,
     matched_agency: string,
-    total_employment_stints: number
+    mentioned_agencies?: string,
+    total_employment_stints: number,
+    other_officers_summary?: string   // e.g., "1 unique officer(s), 2 total record(s)"
   },
   matched_officer_employment_history: [
     {
-      agency_name: string,
-      start_date: string,
-      end_date?: string,
-      duration_days?: number,
-      separation_reason?: string,
-      post_id?: string
+      post_person_nbr: string,        // POST ID or officer identifier
+      post_first_name: string,
+      post_middle_name?: string,
+      post_last_name: string,
+      post_suffix?: string | null,
+      post_agency_name: string,
+      post_agency_type?: string,      // e.g., "AgencyType.POLICE"
+      post_start_date: string,        // ISO timestamp or formatted date
+      post_end_date?: string | null,
+      post_separation_reason?: string | null,
+      state?: string,                 // e.g., "CA"
+      county?: string                 // e.g., "Contra Costa County"
     }
   ],
   other_officers_with_same_name: [
     {
-      post_id: string,
-      officer_name: string,
-      employment_history: [ /* same structure as above */ ]
+      post_person_nbr: string,
+      post_first_name: string,
+      post_middle_name?: string,
+      post_last_name: string,
+      post_agency_name: string,
+      post_start_date: string,
+      post_end_date?: string | null
     }
   ],
   citations: [
     {
       file_name: string,
-      file_id: string,
+      file_id: string,               // SHA1 hash
       page_number: number,
       quote: string,
+      validator_reasoning?: string,  // Why this citation supports the match
       agency_name: string,
-      blob_url: string                // Azure Blob Storage URL
+      blob_url: string               // Azure Blob Storage URL with SAS token
     }
   ],
   citation_count: number,
+
+  // Incident date information (enriched data)
+  csv_incident_date: string | null,  // ISO date format (YYYY-MM-DD)
+  csv_incident_year: string | null,
+  csv_incident_month: string | null,
+  csv_incident_day: string | null,
+
+  // Incident date citations (different from employment citations above)
+  csv_citations: [
+    {
+      filename: string,
+      sha1: string,                  // File hash
+      gdrive_id: string,             // Google Drive file ID
+      gdrive_url: string,            // Google Drive URL
+      page_number: number,
+      quote: string,                 // Text evidence of incident date
+      validator_reasoning: string    // Why this citation supports the incident date
+    }
+  ] | null,
+
+  csv_blob_urls: string | null,      // Additional blob storage URLs for incident
+  csv_enriched_at: string | null,    // ISO timestamp when enrichment was added
+
   validation: {
     status: 'pending' | 'being_reviewed' | 'correct' | 'incorrect' | 'needs_review',
     validated_by: string | null,
-    validated_at: string | null,      // ISO timestamp
+    validated_at: string | null,     // ISO timestamp
     notes: string | null
-  }
+  },
+
+  // Additional metadata
+  success?: boolean,
+  error?: string | null
 }
 ```
+
+**Key Field Distinctions:**
+- `citations` - Citations supporting the **officer employment match** (agency citations)
+- `csv_citations` - Citations supporting the **incident date** (date citations, will be rendered on front-end)
+- `csv_incident_date` - The parsed incident date in ISO format (YYYY-MM-DD)
+- `csv_blob_urls` - Additional blob storage URLs specifically for incident-related documents
 
 ### SQL Function: `claim_next_officer`
 
