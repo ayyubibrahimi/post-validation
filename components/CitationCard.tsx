@@ -59,10 +59,10 @@ export default function CitationCard({ citation, type = 'agency' }: CitationCard
       /\b\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}\b/gi, // DD Month YYYY
     ];
 
-    let result: (string | JSX.Element)[] = [text];
+    let result: (string | React.ReactElement)[] = [text];
 
     datePatterns.forEach((pattern) => {
-      const newResult: (string | JSX.Element)[] = [];
+      const newResult: (string | React.ReactElement)[] = [];
       result.forEach((part, idx) => {
         if (typeof part === 'string') {
           const matches = part.split(pattern);

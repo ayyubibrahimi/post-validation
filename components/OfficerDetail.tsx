@@ -1,27 +1,36 @@
 'use client';
 
-import { Lock, AlertTriangle, Loader2, ArrowRight, Calendar, Clock } from 'lucide-react';
-import { useOfficerDetail } from '@/hooks';
-import Carousel from './Carousel';
+import { useState } from 'react';
+import { Lock, AlertTriangle, Loader2, ArrowRight, Clock, ChevronDown, ChevronUp, CheckCircle, XCircle, Eye, ExternalLink } from 'lucide-react';
+import { useOfficerDetail, useValidateOfficer } from '@/hooks';
 import CitationCard from './CitationCard';
 import type { EmploymentHistory } from '@/lib/types';
 import styles from './OfficerDetail.module.scss';
 
 interface OfficerDetailProps {
   mentionUid: string | null;
+  validatorId: string;
+  onValidationComplete: () => void;
 }
 
 /**
- * OfficerDetail - Main content area showing full officer information
+ * OfficerDetail - Redesigned split comparison layout
  *
- * Sections (vertically stacked with separators):
- * 1. Header Section: Input name, matched officer, probability, agency
- * 2. Matched Officer Employment History (table)
- * 3. Other Officers with Same Name (carousel)
- * 4. Citations (carousel)
+ * Layout:
+ * 1. Side-by-side comparison (Input Officer | Match % | Matched POST Officer)
+ * 2. Validation actions (Confirm/Reject/Needs Review)
+ * 3. Tabbed citations (Agency | Incident Date)
+ * 4. Collapsible disambiguation section
  */
-export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
+export default function OfficerDetail({ mentionUid, validatorId, onValidationComplete }: OfficerDetailProps) {
   const { data: officer, isLoading } = useOfficerDetail(mentionUid);
+  const validateOfficer = useValidateOfficer();
+
+  const [activeTab, setActiveTab] = useState<'agency' | 'incident'>('agency');
+  const [disambiguationOpen, setDisambiguationOpen] = useState(false);
+  const [notes, setNotes] = useState('');
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'correct' | 'incorrect' | 'needs_review' | null>(null);
 
   // Empty state
   if (!mentionUid || !officer) {
@@ -48,13 +57,14 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
   const {
     officer_info,
     matched_officer_employment_history = [],
+    other_officers_with_same_name = [],
     citations = [],
     csv_incident_date,
     csv_citations,
     csv_enriched_at,
   } = officer.data || {};
 
-  // Safety check for officer_info
+  // Safety check
   if (!officer_info) {
     return (
       <div className={styles.emptyState}>
@@ -65,17 +75,10 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
     );
   }
 
-  const matchProbability = officer_info?.match_probability
-    ? officer_info.match_probability * 100
-    : 0;
-  const matchColor =
-    matchProbability >= 85
-      ? styles.matchHigh
-      : matchProbability >= 70
-      ? styles.matchMedium
-      : styles.matchLow;
+  const matchProbability = officer_info?.match_probability ? officer_info.match_probability * 100 : 0;
+  const matchColor = matchProbability >= 85 ? 'high' : matchProbability >= 70 ? 'medium' : 'low';
 
-  // Format incident date for display
+  // Format dates
   const formatIncidentDate = (dateString: string | null) => {
     if (!dateString) return null;
     try {
@@ -90,7 +93,6 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
     }
   };
 
-  // Format enrichment timestamp
   const formatEnrichedAt = (timestamp: string | null) => {
     if (!timestamp) return null;
     try {
@@ -105,82 +107,106 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
     }
   };
 
+  // Handle validation
+  const handleValidationClick = (status: 'correct' | 'incorrect' | 'needs_review') => {
+    setPendingAction(status);
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmValidation = () => {
+    if (!pendingAction) return;
+
+    validateOfficer.mutate(
+      {
+        mentionUid: mentionUid!,
+        validatorId,
+        status: pendingAction,
+        notes: notes.trim() || undefined,
+      },
+      {
+        onSuccess: () => {
+          setConfirmDialogOpen(false);
+          setPendingAction(null);
+          setNotes('');
+          onValidationComplete();
+        },
+        onError: (error) => {
+          console.error('Validation failed:', error);
+        },
+      }
+    );
+  };
+
   return (
     <div className={styles.container}>
-      {/* Officer Information Card */}
-      <div className={styles.headerCard}>
-        {/* Section 1: Input Officer Information (from case) */}
-        <div className={styles.inputOfficerSection}>
-          <h3 className={styles.sectionHeading}>Input Officer Information</h3>
+      {/* Split Comparison */}
+      <div className={styles.comparisonSection}>
+        {/* Left: Input Officer */}
+        <div className={styles.inputPanel}>
+          <h3 className={styles.panelTitle}>LLM Extractions</h3>
 
-          <div className={styles.infoGrid}>
-            <div className={styles.infoItem}>
-              <div className={styles.label}>Officer Name (from case)</div>
-              <div className={styles.inputName}>
-                {officer_info.first_name} {officer_info.middle_name} {officer_info.last_name}
-              </div>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel}>LLM: Name Extracted</label>
+            <div className={styles.fieldValue}>
+              {officer_info.first_name} {officer_info.middle_name} {officer_info.last_name}
             </div>
+          </div>
 
-            <div className={styles.infoItem}>
-              <div className={styles.label}>Case ID</div>
-              <div className={styles.caseId}>{officer_info.provisional_case_name}</div>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel}>LLM: Employing Agency Extracted</label>
+            <div className={styles.fieldValue}>{officer_info.matched_agency}</div>
+          </div>
+
+          {csv_incident_date && (
+            <div className={styles.field}>
+              <label className={styles.fieldLabel}>LLM: Incident Date Extracted</label>
+              <div className={styles.fieldValue}>{formatIncidentDate(csv_incident_date)}</div>
             </div>
+          )}
 
-            {csv_incident_date && (
-              <div className={styles.infoItem}>
-                <div className={styles.label}>Incident Date</div>
-                <div className={styles.incidentDate}>
-                  <Calendar size={14} />
-                  {formatIncidentDate(csv_incident_date)}
-                </div>
-              </div>
-            )}
-
-            <div className={styles.infoItem}>
-              <div className={styles.label}>Officer Matched to Agency</div>
-              <div className={styles.agencyName}>{officer_info.matched_agency}</div>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel}>LLM: All Agencies Mentioned in Case Documents</label>
+            <div className={styles.fieldValueMuted}>
+              {officer_info.mentioned_agencies || 'None'}
             </div>
+          </div>
 
-            <div className={styles.infoItem}>
-              <div className={styles.label}>Agencies Mentioned in Case Documents</div>
-              <div className={styles.mentionedAgencies}>
-                {officer_info.mentioned_agencies || 'None'}
-              </div>
-            </div>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel}>Case ID</label>
+            <div className={styles.caseId}>{officer_info.provisional_case_name}</div>
           </div>
         </div>
 
-        {/* Divider */}
-        <div className={styles.sectionDivider} />
+        {/* Center: Match Badge */}
+        <div className={styles.matchBadgeContainer}>
+          <div className={`${styles.matchBadge} ${styles[matchColor]}`}>
+            <div className={styles.matchPercentage}>{matchProbability.toFixed(1)}%</div>
+            <div className={styles.matchLabel}>match</div>
+          </div>
+        </div>
 
-        {/* Section 2: Matched POST Officer (candidate) */}
-        <div className={styles.matchedOfficerSection}>
+        {/* Right: Matched POST Officer */}
+        <div className={styles.matchedPanel}>
           <div className={styles.matchedHeader}>
-            <h3 className={styles.sectionHeading}>Matched POST Officer</h3>
+            <h3 className={styles.panelTitle}>Entity Res: Matched POST Officer</h3>
             <div className={styles.lockIndicator}>
-              <Lock size={14} />
+              <Lock size={12} />
               <span>Assigned</span>
             </div>
           </div>
 
-          <div className={styles.matchedOfficerInfo}>
-            <div className={styles.officerNameRow}>
-              <div>
-                <div className={styles.officerName}>
-                  {officer_info.first_name} {officer_info.middle_name} {officer_info.last_name}
-                </div>
-                <div className={styles.postId}>POST ID: {officer_info.matched_post_id}</div>
-              </div>
-              <div className={`${styles.probabilityBadge} ${matchColor}`}>
-                {matchProbability.toFixed(1)}% match
-              </div>
+          <div className={styles.matchedInfo}>
+            <div className={styles.matchedName}>
+              {officer_info.first_name} {officer_info.middle_name} {officer_info.last_name}
             </div>
+            <div className={styles.postId}>POST ID: {officer_info.matched_post_id}</div>
+            <div className={styles.matchedAgency}>Agency: {officer_info.matched_agency}</div>
           </div>
 
-          <div className={styles.employmentSection}>
-            <h4 className={styles.subsectionTitle}>Employment History</h4>
+          <div className={styles.employmentHistory}>
+            <h4 className={styles.employmentTitle}>Employment History</h4>
             {matched_officer_employment_history.length > 0 ? (
-              <EmploymentTable employments={matched_officer_employment_history} isMatched={true} />
+              <EmploymentTable employments={matched_officer_employment_history} />
             ) : (
               <div className={styles.noData}>No employment history available</div>
             )}
@@ -188,86 +214,213 @@ export default function OfficerDetail({ mentionUid }: OfficerDetailProps) {
         </div>
       </div>
 
-      {/* Separator */}
-      <div className={styles.separator} />
+      {/* Validation Actions */}
+      <div className={styles.actionsSection}>
+        <button
+          onClick={() => handleValidationClick('correct')}
+          disabled={validateOfficer.isPending}
+          className={`${styles.actionButton} ${styles.confirmButton}`}
+        >
+          <CheckCircle size={18} />
+          Confirm Match
+        </button>
 
-      {/* Agency Citations - Carousel */}
-      <div className={styles.sectionCard}>
-        <h2 className={styles.sectionTitle}>
-          Agency Employment Citations ({citations.length})
-          {citations.length === 0 && (
-            <span className={styles.warningBadge}>
-              <AlertTriangle size={14} />
-              No citations - verify manually
-            </span>
-          )}
-        </h2>
+        <button
+          onClick={() => handleValidationClick('incorrect')}
+          disabled={validateOfficer.isPending}
+          className={`${styles.actionButton} ${styles.rejectButton}`}
+        >
+          <XCircle size={18} />
+          Reject Match
+        </button>
 
-        {citations.length > 0 ? (
-          <Carousel
-            items={citations}
-            renderItem={(citation) => <CitationCard citation={citation} type="agency" />}
-            emptyState={null}
-            controlsPosition="bottom"
-          />
-        ) : (
-          <div className={styles.noCitations}>
-            <AlertTriangle size={24} className={styles.warningIcon} />
-            <p>No citations found for this officer.</p>
-            {officer_info.document_link && (
-              <a
-                href={officer_info.document_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.documentLink}
-              >
-                Manually verify by checking the documents at this link
-              </a>
-            )}
-          </div>
-        )}
+        <button
+          onClick={() => handleValidationClick('needs_review')}
+          disabled={validateOfficer.isPending}
+          className={`${styles.actionButton} ${styles.reviewButton}`}
+        >
+          <Eye size={18} />
+          Needs Review
+        </button>
       </div>
 
-      {/* Incident Date Citations - Carousel (if available) */}
-      {csv_citations && csv_citations.length > 0 && (
-        <>
-          {/* Separator */}
-          <div className={styles.separator} />
-
-          <div className={styles.sectionCard}>
-            <h2 className={styles.sectionTitle}>
-              Incident Date Citations ({csv_citations.length})
+      {/* Tabbed Citations */}
+      <div className={styles.citationsSection}>
+        <div className={styles.citationsTabs}>
+          <button
+            onClick={() => setActiveTab('agency')}
+            className={`${styles.tab} ${activeTab === 'agency' ? styles.tabActive : ''}`}
+          >
+            LLM Extractions: Agency Page-Level Citations ({citations.length})
+          </button>
+          {csv_citations && csv_citations.length > 0 && (
+            <button
+              onClick={() => setActiveTab('incident')}
+              className={`${styles.tab} ${activeTab === 'incident' ? styles.tabActive : ''}`}
+            >
+              LLM Extractions: Incident Date Page-Level Citations ({csv_citations.length})
               {csv_enriched_at && (
                 <span className={styles.enrichedBadge}>
-                  <Clock size={12} />
-                  Enriched {formatEnrichedAt(csv_enriched_at)}
                 </span>
               )}
-            </h2>
+            </button>
+          )}
+        </div>
 
-            <Carousel
-              items={csv_citations}
-              renderItem={(citation) => <CitationCard citation={citation} type="incident" />}
-              emptyState={null}
-              controlsPosition="bottom"
-            />
+        <div className={styles.citationsContent}>
+          {activeTab === 'agency' && (
+            <div className={styles.citationsList}>
+              {citations.length > 0 ? (
+                citations.map((citation, index) => (
+                  <CitationCard key={index} citation={citation} type="agency" />
+                ))
+              ) : (
+                <div className={styles.noCitations}>
+                  <AlertTriangle size={24} />
+                  <p>No agency citations available.</p>
+                  {officer_info.document_link && (
+                    <p className={styles.documentLinkText}>
+                      However, you can{' '}
+                      <a
+                        href={officer_info.document_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.documentLink}
+                      >
+                        review the source documents here
+                        <ExternalLink size={14} className={styles.externalIcon} />
+                      </a>
+                      {' '}to look for relevant supporting data.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'incident' && (
+            <div className={styles.citationsList}>
+              {csv_citations && csv_citations.length > 0 ? (
+                csv_citations.map((citation, index) => (
+                  <CitationCard key={index} citation={citation} type="incident" />
+                ))
+              ) : (
+                <div className={styles.noCitations}>
+                  <AlertTriangle size={24} />
+                  <p>No incident date citations available.</p>
+                  {officer_info.document_link && (
+                    <p className={styles.documentLinkText}>
+                      However, you can{' '}
+                      <a
+                        href={officer_info.document_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.documentLink}
+                      >
+                        review the source documents here
+                        <ExternalLink size={14} className={styles.externalIcon} />
+                      </a>
+                      {' '}to look for relevant supporting data.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Disambiguation Section */}
+      {other_officers_with_same_name.length > 0 && (() => {
+        const groupedOfficers = groupOfficersByPostId(other_officers_with_same_name);
+        const uniqueOfficerCount = groupedOfficers.length;
+
+        return (
+          <div className={styles.disambiguationSection}>
+            <button
+              onClick={() => setDisambiguationOpen(!disambiguationOpen)}
+              className={styles.disambiguationToggle}
+            >
+              <span>
+                Disambiguation ({uniqueOfficerCount} officer{uniqueOfficerCount !== 1 ? 's' : ''} with same name)
+              </span>
+              {disambiguationOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            </button>
+
+            {disambiguationOpen && (
+              <div className={styles.disambiguationContent}>
+                {groupedOfficers.map((group, index) => (
+                <div key={index} className={styles.disambiguationItem}>
+                  <div className={styles.disambiguationHeader}>
+                    <span className={styles.disambiguationName}>
+                      {group.name}
+                    </span>
+                    <span className={styles.disambiguationPostId}>
+                      POST ID: {group.postId}
+                    </span>
+                  </div>
+                  <div className={styles.disambiguationTable}>
+                    <EmploymentTable employments={group.employments} />
+                  </div>
+                </div>
+                ))}
+              </div>
+            )}
           </div>
-        </>
+        );
+      })()}
+
+      {/* Confirmation Dialog */}
+      {confirmDialogOpen && (
+        <div className={styles.dialogOverlay} onClick={() => setConfirmDialogOpen(false)}>
+          <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.dialogTitle}>
+              Confirm {pendingAction === 'correct' ? 'Match' : pendingAction === 'incorrect' ? 'Rejection' : 'Review'}
+            </h3>
+            <p className={styles.dialogMessage}>
+              Are you sure you want to mark this officer match as <strong>{pendingAction}</strong>?
+            </p>
+
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add notes (optional)"
+              className={styles.dialogNotes}
+              rows={3}
+            />
+
+            <div className={styles.dialogActions}>
+              <button
+                onClick={() => setConfirmDialogOpen(false)}
+                disabled={validateOfficer.isPending}
+                className={styles.dialogCancelButton}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmValidation}
+                disabled={validateOfficer.isPending}
+                className={styles.dialogConfirmButton}
+              >
+                {validateOfficer.isPending ? (
+                  <>
+                    <Loader2 size={14} className={styles.buttonSpinner} />
+                    Saving...
+                  </>
+                ) : (
+                  'Confirm'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
 }
 
-// Employment Table Component
-function EmploymentTable({
-  employments,
-  isMatched,
-}: {
-  employments: EmploymentHistory[] | undefined;
-  isMatched: boolean;
-}) {
-  const safeEmployments = employments || [];
-
+// Helper: Employment Table
+function EmploymentTable({ employments }: { employments: EmploymentHistory[] }) {
   const calculateDuration = (startDate: string | undefined, endDate: string | null | undefined) => {
     if (!startDate) return null;
     const start = new Date(startDate);
@@ -296,36 +449,48 @@ function EmploymentTable({
           </tr>
         </thead>
         <tbody>
-          {safeEmployments.length > 0 ? (
-            safeEmployments.map((emp, index) => {
-              const durationDays = calculateDuration(emp.post_start_date, emp.post_end_date);
-              return (
-                <tr key={index} className={isMatched ? styles.matchedRow : ''}>
-                  <td>{emp.post_agency_name || 'N/A'}</td>
-                  <td>{formatDate(emp.post_start_date) || 'N/A'}</td>
-                  <td>{emp.post_end_date ? formatDate(emp.post_end_date) : 'Present'}</td>
-                  <td>
-                    {durationDays
-                      ? `${Math.floor(durationDays / 365)}y ${Math.floor(
-                          (durationDays % 365) / 30
-                        )}m`
-                      : 'N/A'}
-                  </td>
-                </tr>
-              );
-            })
-          ) : (
-            <tr>
-              <td
-                colSpan={4}
-                style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}
-              >
-                No employment history available
-              </td>
-            </tr>
-          )}
+          {employments.map((emp, index) => {
+            const durationDays = calculateDuration(emp.post_start_date, emp.post_end_date);
+            return (
+              <tr key={index}>
+                <td>{emp.post_agency_name || 'N/A'}</td>
+                <td>{formatDate(emp.post_start_date) || 'N/A'}</td>
+                <td>{emp.post_end_date ? formatDate(emp.post_end_date) : 'Present'}</td>
+                <td>
+                  {durationDays
+                    ? `${Math.floor(durationDays / 365)}y ${Math.floor((durationDays % 365) / 30)}m`
+                    : 'N/A'}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
   );
 }
+
+// Helper: Group officers by POST ID
+function groupOfficersByPostId(employments: EmploymentHistory[]) {
+  const groups = new Map<string, { name: string; postId: string; employments: EmploymentHistory[] }>();
+
+  employments.forEach((emp) => {
+    const postId = emp.post_person_nbr || 'Unknown';
+    const name = `${emp.post_first_name || ''} ${emp.post_middle_name || ''} ${emp.post_last_name || ''}`.trim();
+
+    if (!groups.has(postId)) {
+      groups.set(postId, { name, postId, employments: [] });
+    }
+    groups.get(postId)!.employments.push(emp);
+  });
+
+  const result = Array.from(groups.values());
+  console.log('Disambiguation grouping:', {
+    totalEmployments: employments.length,
+    uniqueOfficers: result.length,
+    postIds: result.map(g => g.postId),
+    groups: result,
+  });
+  return result;
+}
+

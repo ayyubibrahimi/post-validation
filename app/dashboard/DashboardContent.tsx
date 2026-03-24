@@ -3,18 +3,16 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
-import DashboardLayout from '@/components/DashboardLayout';
-import LeftSidebar from '@/components/LeftSidebar';
-import RightSidebar from '@/components/RightSidebar';
+import ValidationHeader from '@/components/ValidationHeader';
 import OfficerDetail from '@/components/OfficerDetail';
+import styles from './DashboardContent.module.scss';
 
 /**
  * Dashboard Content - Client component with search params access
  *
  * Layout:
- * - Left Sidebar: Stats + Queue + Next Officer button
- * - Main Content: Officer detail with carousels and navigation
- * - Right Sidebar: Validation actions
+ * - Top Header: Navigation, progress, stats, and actions
+ * - Main Content: Officer detail with split comparison, actions, citations, disambiguation
  */
 export default function DashboardContent() {
   const searchParams = useSearchParams();
@@ -164,26 +162,28 @@ export default function DashboardContent() {
   const canGoForward = currentIndex < officerHistory.length - 1;
 
   return (
-    <DashboardLayout>
-      {/* Left Sidebar - Stats, Queue, Navigation */}
-      <LeftSidebar
+    <div className={styles.dashboard}>
+      {/* Top Header - Navigation, Progress, Stats, Actions */}
+      <ValidationHeader
         validatorId={validatorId}
         currentOfficerUid={currentOfficerUid}
+        currentIndex={currentIndex}
+        canGoBack={canGoBack}
+        canGoForward={canGoForward}
+        onPrevious={handlePreviousOfficer}
+        onNextInHistory={handleNextInHistory}
         onOfficerClaimed={handleOfficerClaimed}
         onOfficerReleased={handleOfficerReleased}
-        onPrevious={handlePreviousOfficer}
-        canGoBack={canGoBack}
       />
 
-      {/* Main Content - Officer Details */}
-      <OfficerDetail mentionUid={currentOfficerUid} />
-
-      {/* Right Sidebar - Validation Actions */}
-      <RightSidebar
-        mentionUid={currentOfficerUid}
-        validatorId={validatorId}
-        onValidationComplete={handleValidationComplete}
-      />
-    </DashboardLayout>
+      {/* Main Content - Officer Details with integrated actions */}
+      <main className={styles.mainContent}>
+        <OfficerDetail
+          mentionUid={currentOfficerUid}
+          validatorId={validatorId}
+          onValidationComplete={handleValidationComplete}
+        />
+      </main>
+    </div>
   );
 }

@@ -17,10 +17,9 @@ import { supabase } from '@/lib/supabase';
 export async function POST() {
   try {
     // Find all officers that are currently locked (being_reviewed_by is not null)
-    // and reset them to pending status
     const { data: lockedOfficers, error: selectError } = await supabase
       .from('officer_validations')
-      .select('mention_uid, being_reviewed_by')
+      .select('*')
       .not('being_reviewed_by', 'is', null);
 
     if (selectError) {
@@ -48,16 +47,38 @@ export async function POST() {
       );
     }
 
-    // Clear all locks using raw SQL for JSONB update
-    const { error: updateError } = await supabase.rpc('clear_all_locks');
+    // Clear each lock by updating the officer data
+    const updatePromises = lockedOfficers.map(async (officer) => {
+      const updatedData = {
+        ...officer.data,
+        validation: {
+          ...officer.data.validation,
+          status: 'pending',
+        },
+      };
 
-    if (updateError) {
-      console.error('Error clearing locks:', updateError);
+      return supabase
+        .from('officer_validations')
+        .update({
+          being_reviewed_by: null,
+          being_reviewed_at: null,
+          data: updatedData,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', officer.id);
+    });
+
+    const results = await Promise.all(updatePromises);
+
+    // Check if any updates failed
+    const failures = results.filter((result) => result.error);
+    if (failures.length > 0) {
+      console.error('Some lock clears failed:', failures);
       return NextResponse.json(
         {
           success: false,
-          clearedCount: 0,
-          message: `Database error: ${updateError.message}`,
+          clearedCount: clearedCount - failures.length,
+          message: `Cleared ${clearedCount - failures.length} locks, ${failures.length} failed`,
         },
         { status: 500 }
       );
