@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Lock, AlertTriangle, Loader2, ArrowRight, Clock, ChevronDown, ChevronUp, CheckCircle, XCircle, Eye, ExternalLink } from 'lucide-react';
+import { Lock, AlertTriangle, Loader2, ArrowRight, ChevronDown, ChevronUp, CheckCircle, XCircle, Eye, ExternalLink, Pencil, Plus, X } from 'lucide-react';
 import { useOfficerDetail, useValidateOfficer } from '@/hooks';
 import CitationCard from './CitationCard';
-import type { EmploymentHistory } from '@/lib/types';
+import type { EmploymentHistory, CustomCitation } from '@/lib/types';
 import styles from './OfficerDetail.module.scss';
 
 interface OfficerDetailProps {
@@ -26,9 +26,31 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
   const { data: officer, isLoading } = useOfficerDetail(mentionUid);
   const validateOfficer = useValidateOfficer();
 
-  const [activeTab, setActiveTab] = useState<'agency' | 'incident'>('agency');
+  const [activeTab, setActiveTab] = useState<'agency' | 'incident'>('incident');
   const [disambiguationOpen, setDisambiguationOpen] = useState(false);
+
+  // Case notes (global)
   const [notes, setNotes] = useState('');
+
+  // Per-section notes
+  const [officerMatchNotes, setOfficerMatchNotes] = useState('');
+  const [agencyCitationNotes, setAgencyCitationNotes] = useState('');
+  const [incidentDateNotes, setIncidentDateNotes] = useState('');
+
+  // Inline corrections
+  const [editingIncidentDate, setEditingIncidentDate] = useState(false);
+  const [correctedIncidentDate, setCorrectedIncidentDate] = useState('');
+  const [editingAgency, setEditingAgency] = useState(false);
+  const [correctedAgency, setCorrectedAgency] = useState('');
+
+  // Custom citations
+  const [customCitations, setCustomCitations] = useState<CustomCitation[]>([]);
+  const [addingCitationFor, setAddingCitationFor] = useState<'agency' | 'incident' | null>(null);
+  const [newCitationQuote, setNewCitationQuote] = useState('');
+  const [newCitationFile, setNewCitationFile] = useState('');
+  const [newCitationPage, setNewCitationPage] = useState('');
+  const [newCitationUrl, setNewCitationUrl] = useState('');
+
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<'correct' | 'incorrect' | 'needs_review' | null>(null);
 
@@ -61,7 +83,6 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
     citations = [],
     csv_incident_date,
     csv_citations,
-    csv_enriched_at,
   } = officer.data || {};
 
   // Safety check
@@ -75,10 +96,7 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
     );
   }
 
-  const matchProbability = officer_info?.match_probability ? officer_info.match_probability * 100 : 0;
-  const matchColor = matchProbability >= 85 ? 'high' : matchProbability >= 70 ? 'medium' : 'low';
-
-  // Format dates
+// Format dates
   const formatIncidentDate = (dateString: string | null) => {
     if (!dateString) return null;
     try {
@@ -93,19 +111,6 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
     }
   };
 
-  const formatEnrichedAt = (timestamp: string | null) => {
-    if (!timestamp) return null;
-    try {
-      const date = new Date(timestamp);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      });
-    } catch {
-      return timestamp;
-    }
-  };
 
   // Handle validation
   const handleValidationClick = (status: 'correct' | 'incorrect' | 'needs_review') => {
@@ -116,12 +121,22 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
   const handleConfirmValidation = () => {
     if (!pendingAction) return;
 
+    const hasCorrections = correctedIncidentDate.trim() || correctedAgency.trim();
+
     validateOfficer.mutate(
       {
         mentionUid: mentionUid!,
         validatorId,
         status: pendingAction,
         notes: notes.trim() || undefined,
+        officer_match_notes: officerMatchNotes.trim() || undefined,
+        agency_citation_notes: agencyCitationNotes.trim() || undefined,
+        incident_date_notes: incidentDateNotes.trim() || undefined,
+        corrections: hasCorrections ? {
+          incident_date: correctedIncidentDate.trim() || null,
+          employing_agency: correctedAgency.trim() || null,
+        } : undefined,
+        custom_citations: customCitations.length > 0 ? customCitations : undefined,
       },
       {
         onSuccess: () => {
@@ -137,35 +152,109 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
     );
   };
 
+  const handleAddCustomCitation = () => {
+    if (!newCitationQuote.trim() || !addingCitationFor) return;
+    const citation: CustomCitation = {
+      type: addingCitationFor,
+      quote: newCitationQuote.trim(),
+      file_name: newCitationFile.trim() || 'Manual entry',
+      page_number: parseInt(newCitationPage) || 0,
+      url: newCitationUrl.trim() || undefined,
+      added_by: validatorId,
+      added_at: new Date().toISOString(),
+    };
+    setCustomCitations(prev => [...prev, citation]);
+    setAddingCitationFor(null);
+    setNewCitationQuote('');
+    setNewCitationFile('');
+    setNewCitationPage('');
+    setNewCitationUrl('');
+  };
+
   return (
     <div className={styles.container}>
       {/* Split Comparison */}
       <div className={styles.comparisonSection}>
         {/* Left: Input Officer */}
         <div className={styles.inputPanel}>
-          <h3 className={styles.panelTitle}>LLM Extractions</h3>
+          <h3 className={styles.panelTitle}>Reviewed Officer</h3>
 
           <div className={styles.field}>
-            <label className={styles.fieldLabel}>LLM: Name Extracted</label>
+            <label className={styles.fieldLabel}>Name (extracted)</label>
             <div className={styles.fieldValue}>
               {officer_info.first_name} {officer_info.middle_name} {officer_info.last_name}
             </div>
           </div>
 
           <div className={styles.field}>
-            <label className={styles.fieldLabel}>LLM: Employing Agency Extracted</label>
-            <div className={styles.fieldValue}>{officer_info.matched_agency}</div>
+            <label className={styles.fieldLabel}>
+              Employing Agency (extracted)
+              <button
+                className={styles.editFieldButton}
+                onClick={() => { setEditingAgency(!editingAgency); setCorrectedAgency(correctedAgency || officer_info.matched_agency); }}
+                title="Correct this value"
+              >
+                <Pencil size={12} />
+              </button>
+            </label>
+            {editingAgency ? (
+              <div className={styles.correctionField}>
+                <input
+                  type="text"
+                  value={correctedAgency}
+                  onChange={(e) => setCorrectedAgency(e.target.value)}
+                  className={styles.correctionInput}
+                  placeholder="Enter corrected agency name"
+                />
+                <button className={styles.correctionSave} onClick={() => setEditingAgency(false)}>Save</button>
+              </div>
+            ) : (
+              <div className={styles.fieldValue}>
+                {correctedAgency || officer_info.matched_agency}
+                {correctedAgency && correctedAgency !== officer_info.matched_agency && (
+                  <span className={styles.correctedBadge}>corrected</span>
+                )}
+              </div>
+            )}
           </div>
 
           {csv_incident_date && (
             <div className={styles.field}>
-              <label className={styles.fieldLabel}>LLM: Incident Date Extracted</label>
-              <div className={styles.fieldValue}>{formatIncidentDate(csv_incident_date)}</div>
+              <label className={styles.fieldLabel}>
+                Incident Date (extracted)
+                <button
+                  className={styles.editFieldButton}
+                  onClick={() => { setEditingIncidentDate(!editingIncidentDate); setCorrectedIncidentDate(correctedIncidentDate || csv_incident_date || ''); }}
+                  title="Correct this value"
+                >
+                  <Pencil size={12} />
+                </button>
+              </label>
+              {editingIncidentDate ? (
+                <div className={styles.correctionField}>
+                  <input
+                    type="date"
+                    value={correctedIncidentDate}
+                    onChange={(e) => setCorrectedIncidentDate(e.target.value)}
+                    className={styles.correctionInput}
+                  />
+                  <button className={styles.correctionSave} onClick={() => setEditingIncidentDate(false)}>Save</button>
+                </div>
+              ) : (
+                <div className={styles.fieldValue}>
+                  {correctedIncidentDate
+                    ? formatIncidentDate(correctedIncidentDate)
+                    : formatIncidentDate(csv_incident_date)}
+                  {correctedIncidentDate && correctedIncidentDate !== csv_incident_date && (
+                    <span className={styles.correctedBadge}>corrected</span>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
           <div className={styles.field}>
-            <label className={styles.fieldLabel}>LLM: All Agencies Mentioned in Case Documents</label>
+            <label className={styles.fieldLabel}>All Agencies Mentioned in Case Documents</label>
             <div className={styles.fieldValueMuted}>
               {officer_info.mentioned_agencies || 'None'}
             </div>
@@ -177,18 +266,10 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
           </div>
         </div>
 
-        {/* Center: Match Badge */}
-        <div className={styles.matchBadgeContainer}>
-          <div className={`${styles.matchBadge} ${styles[matchColor]}`}>
-            <div className={styles.matchPercentage}>{matchProbability.toFixed(1)}%</div>
-            <div className={styles.matchLabel}>match</div>
-          </div>
-        </div>
-
-        {/* Right: Matched POST Officer */}
+{/* Right: Matched POST Officer */}
         <div className={styles.matchedPanel}>
           <div className={styles.matchedHeader}>
-            <h3 className={styles.panelTitle}>Entity Res: Matched POST Officer</h3>
+            <h3 className={styles.panelTitle}>Matched Officer</h3>
             <div className={styles.lockIndicator}>
               <Lock size={12} />
               <span>Assigned</span>
@@ -199,7 +280,7 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
             <div className={styles.matchedName}>
               {officer_info.first_name} {officer_info.middle_name} {officer_info.last_name}
             </div>
-            <div className={styles.postId}>POST ID: {officer_info.matched_post_id}</div>
+            <div className={styles.postId}>ID: {officer_info.matched_post_id}</div>
             <div className={styles.matchedAgency}>Agency: {officer_info.matched_agency}</div>
           </div>
 
@@ -222,7 +303,7 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
           className={`${styles.actionButton} ${styles.confirmButton}`}
         >
           <CheckCircle size={18} />
-          Confirm Match
+          Yes
         </button>
 
         <button
@@ -231,7 +312,7 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
           className={`${styles.actionButton} ${styles.rejectButton}`}
         >
           <XCircle size={18} />
-          Reject Match
+          No
         </button>
 
         <button
@@ -240,7 +321,7 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
           className={`${styles.actionButton} ${styles.reviewButton}`}
         >
           <Eye size={18} />
-          Needs Review
+          Unclear
         </button>
       </div>
 
@@ -248,56 +329,20 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
       <div className={styles.citationsSection}>
         <div className={styles.citationsTabs}>
           <button
+            onClick={() => setActiveTab('incident')}
+            className={`${styles.tab} ${activeTab === 'incident' ? styles.tabActive : ''}`}
+          >
+            Incident Date ({(csv_citations?.length ?? 0) + customCitations.filter(c => c.type === 'incident').length})
+          </button>
+          <button
             onClick={() => setActiveTab('agency')}
             className={`${styles.tab} ${activeTab === 'agency' ? styles.tabActive : ''}`}
           >
-            LLM Extractions: Agency Page-Level Citations ({citations.length})
+            Employing Agency ({citations.length + customCitations.filter(c => c.type === 'agency').length})
           </button>
-          {csv_citations && csv_citations.length > 0 && (
-            <button
-              onClick={() => setActiveTab('incident')}
-              className={`${styles.tab} ${activeTab === 'incident' ? styles.tabActive : ''}`}
-            >
-              LLM Extractions: Incident Date Page-Level Citations ({csv_citations.length})
-              {csv_enriched_at && (
-                <span className={styles.enrichedBadge}>
-                </span>
-              )}
-            </button>
-          )}
         </div>
 
         <div className={styles.citationsContent}>
-          {activeTab === 'agency' && (
-            <div className={styles.citationsList}>
-              {citations.length > 0 ? (
-                citations.map((citation, index) => (
-                  <CitationCard key={index} citation={citation} type="agency" />
-                ))
-              ) : (
-                <div className={styles.noCitations}>
-                  <AlertTriangle size={24} />
-                  <p>No agency citations available.</p>
-                  {officer_info.document_link && (
-                    <p className={styles.documentLinkText}>
-                      However, you can{' '}
-                      <a
-                        href={officer_info.document_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.documentLink}
-                      >
-                        review the source documents here
-                        <ExternalLink size={14} className={styles.externalIcon} />
-                      </a>
-                      {' '}to look for relevant supporting data.
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
           {activeTab === 'incident' && (
             <div className={styles.citationsList}>
               {csv_citations && csv_citations.length > 0 ? (
@@ -310,13 +355,8 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
                   <p>No incident date citations available.</p>
                   {officer_info.document_link && (
                     <p className={styles.documentLinkText}>
-                      However, you can{' '}
-                      <a
-                        href={officer_info.document_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.documentLink}
-                      >
+                      You can{' '}
+                      <a href={officer_info.document_link} target="_blank" rel="noopener noreferrer" className={styles.documentLink}>
                         review the source documents here
                         <ExternalLink size={14} className={styles.externalIcon} />
                       </a>
@@ -325,6 +365,85 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
                   )}
                 </div>
               )}
+              {customCitations.filter(c => c.type === 'incident').map((c, i) => (
+                <div key={`custom-incident-${i}`} className={styles.customCitationCard}>
+                  <div className={styles.customCitationHeader}>
+                    <span className={styles.customBadge}>Added by {c.added_by}</span>
+                    <button className={styles.removeCitationButton} onClick={() => setCustomCitations(prev => prev.filter((_, idx) => !(prev[idx].type === 'incident' && prev.filter(x => x.type === 'incident').indexOf(prev[idx]) === i)))}><X size={12} /></button>
+                  </div>
+                  <p className={styles.customCitationQuote}>{c.quote}</p>
+                  <span className={styles.customCitationMeta}>{c.file_name}{c.page_number ? ` · Page ${c.page_number}` : ''}</span>
+                </div>
+              ))}
+              {addingCitationFor === 'incident' ? (
+                <div className={styles.addCitationForm}>
+                  <textarea value={newCitationQuote} onChange={(e) => setNewCitationQuote(e.target.value)} placeholder="Quote from document..." className={styles.addCitationTextarea} rows={3} autoFocus />
+                  <div className={styles.addCitationRow}>
+                    <input type="text" value={newCitationFile} onChange={(e) => setNewCitationFile(e.target.value)} placeholder="File name" className={styles.addCitationInput} />
+                    <input type="number" value={newCitationPage} onChange={(e) => setNewCitationPage(e.target.value)} placeholder="Page #" className={`${styles.addCitationInput} ${styles.addCitationInputSmall}`} />
+                  </div>
+                  <input type="url" value={newCitationUrl} onChange={(e) => setNewCitationUrl(e.target.value)} placeholder="Link to document (optional)" className={styles.addCitationInput} />
+                  <div className={styles.addCitationActions}>
+                    <button className={styles.addCitationCancel} onClick={() => setAddingCitationFor(null)}>Cancel</button>
+                    <button className={styles.addCitationSave} onClick={handleAddCustomCitation} disabled={!newCitationQuote.trim()}>Add Citation</button>
+                  </div>
+                </div>
+              ) : (
+                <button className={styles.addCitationButton} onClick={() => setAddingCitationFor('incident')}><Plus size={14} />Add Citation</button>
+              )}
+              <textarea value={incidentDateNotes} onChange={(e) => setIncidentDateNotes(e.target.value)} placeholder="Notes on incident date..." className={styles.sectionNotesTextarea} rows={2} />
+            </div>
+          )}
+
+          {activeTab === 'agency' && (
+            <div className={styles.citationsList}>
+              {citations.length > 0 ? (
+                citations.map((citation, index) => (
+                  <CitationCard key={index} citation={citation} type="agency" />
+                ))
+              ) : (
+                <div className={styles.noCitations}>
+                  <AlertTriangle size={24} />
+                  <p>No agency citations available.</p>
+                  {officer_info.document_link && (
+                    <p className={styles.documentLinkText}>
+                      You can{' '}
+                      <a href={officer_info.document_link} target="_blank" rel="noopener noreferrer" className={styles.documentLink}>
+                        review the source documents here
+                        <ExternalLink size={14} className={styles.externalIcon} />
+                      </a>
+                      {' '}to look for relevant supporting data.
+                    </p>
+                  )}
+                </div>
+              )}
+              {customCitations.filter(c => c.type === 'agency').map((c, i) => (
+                <div key={`custom-agency-${i}`} className={styles.customCitationCard}>
+                  <div className={styles.customCitationHeader}>
+                    <span className={styles.customBadge}>Added by {c.added_by}</span>
+                    <button className={styles.removeCitationButton} onClick={() => setCustomCitations(prev => prev.filter((_, idx) => !(prev[idx].type === 'agency' && prev.filter(x => x.type === 'agency').indexOf(prev[idx]) === i)))}><X size={12} /></button>
+                  </div>
+                  <p className={styles.customCitationQuote}>{c.quote}</p>
+                  <span className={styles.customCitationMeta}>{c.file_name}{c.page_number ? ` · Page ${c.page_number}` : ''}</span>
+                </div>
+              ))}
+              {addingCitationFor === 'agency' ? (
+                <div className={styles.addCitationForm}>
+                  <textarea value={newCitationQuote} onChange={(e) => setNewCitationQuote(e.target.value)} placeholder="Quote from document..." className={styles.addCitationTextarea} rows={3} autoFocus />
+                  <div className={styles.addCitationRow}>
+                    <input type="text" value={newCitationFile} onChange={(e) => setNewCitationFile(e.target.value)} placeholder="File name" className={styles.addCitationInput} />
+                    <input type="number" value={newCitationPage} onChange={(e) => setNewCitationPage(e.target.value)} placeholder="Page #" className={`${styles.addCitationInput} ${styles.addCitationInputSmall}`} />
+                  </div>
+                  <input type="url" value={newCitationUrl} onChange={(e) => setNewCitationUrl(e.target.value)} placeholder="Link to document (optional)" className={styles.addCitationInput} />
+                  <div className={styles.addCitationActions}>
+                    <button className={styles.addCitationCancel} onClick={() => setAddingCitationFor(null)}>Cancel</button>
+                    <button className={styles.addCitationSave} onClick={handleAddCustomCitation} disabled={!newCitationQuote.trim()}>Add Citation</button>
+                  </div>
+                </div>
+              ) : (
+                <button className={styles.addCitationButton} onClick={() => setAddingCitationFor('agency')}><Plus size={14} />Add Citation</button>
+              )}
+              <textarea value={agencyCitationNotes} onChange={(e) => setAgencyCitationNotes(e.target.value)} placeholder="Notes on employing agency..." className={styles.sectionNotesTextarea} rows={2} />
             </div>
           )}
         </div>
@@ -342,7 +461,7 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
               className={styles.disambiguationToggle}
             >
               <span>
-                Disambiguation ({uniqueOfficerCount} officer{uniqueOfficerCount !== 1 ? 's' : ''} with same name)
+                {uniqueOfficerCount} officer{uniqueOfficerCount !== 1 ? 's' : ''} with the same name
               </span>
               {disambiguationOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
             </button>
@@ -356,7 +475,7 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
                       {group.name}
                     </span>
                     <span className={styles.disambiguationPostId}>
-                      POST ID: {group.postId}
+                      ID: {group.postId}
                     </span>
                   </div>
                   <div className={styles.disambiguationTable}>
@@ -370,24 +489,47 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
         );
       })()}
 
+      {/* Combined Notes */}
+      <div className={styles.combinedNotesSection}>
+        <div className={styles.combinedNotesField}>
+          <label className={styles.sectionNotesLabel}>Officer Match Notes</label>
+          <textarea
+            value={officerMatchNotes}
+            onChange={(e) => setOfficerMatchNotes(e.target.value)}
+            placeholder="Notes on the officer match..."
+            className={styles.caseNotesTextarea}
+            rows={4}
+          />
+        </div>
+        <div className={styles.combinedNotesDivider} />
+        <div className={styles.combinedNotesField}>
+          <label className={styles.sectionNotesLabel}>Case Notes</label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="General notes about this case..."
+            className={styles.caseNotesTextarea}
+            rows={4}
+          />
+        </div>
+      </div>
+
       {/* Confirmation Dialog */}
       {confirmDialogOpen && (
         <div className={styles.dialogOverlay} onClick={() => setConfirmDialogOpen(false)}>
           <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
             <h3 className={styles.dialogTitle}>
-              Confirm {pendingAction === 'correct' ? 'Match' : pendingAction === 'incorrect' ? 'Rejection' : 'Review'}
+              {pendingAction === 'correct' ? 'Confirm: Yes' : pendingAction === 'incorrect' ? 'Confirm: No' : 'Confirm: Unclear'}
             </h3>
             <p className={styles.dialogMessage}>
-              Are you sure you want to mark this officer match as <strong>{pendingAction}</strong>?
+              Are you sure you want to mark this officer as <strong>{pendingAction === 'correct' ? 'Yes' : pendingAction === 'incorrect' ? 'No' : 'Unclear'}</strong>?
             </p>
 
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add notes (optional)"
-              className={styles.dialogNotes}
-              rows={3}
-            />
+            {notes.trim() && (
+              <p className={styles.dialogNotePreview}>
+                <strong>Notes:</strong> {notes.trim()}
+              </p>
+            )}
 
             <div className={styles.dialogActions}>
               <button

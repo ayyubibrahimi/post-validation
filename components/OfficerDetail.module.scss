@@ -63,7 +63,7 @@
 
 .comparisonSection {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: var(--spacing-xl);
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
@@ -79,11 +79,9 @@
 }
 
 .panelTitle {
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
+  color: var(--text-primary);
   margin-bottom: var(--spacing-xs);
   padding-bottom: var(--spacing-xs);
   border-bottom: 1px solid var(--border-subtle);
@@ -96,7 +94,7 @@
 }
 
 .fieldLabel {
-  font-size: 10px;
+  font-size: 14px;
   color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
@@ -110,13 +108,13 @@
 }
 
 .fieldValueMuted {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-secondary);
   font-style: italic;
 }
 
 .caseId {
-  font-size: 11px;
+  font-size: 15px;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
   color: var(--text-muted);
 }
@@ -176,7 +174,7 @@
 }
 
 .matchLabel {
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -188,6 +186,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  padding-left: var(--spacing-xl);
+  border-left: 1px solid var(--border-subtle);
 }
 
 .matchedHeader {
@@ -200,7 +200,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 10px;
+  font-size: 14px;
   color: var(--status-being-reviewed);
   background-color: rgba(139, 92, 246, 0.1);
   padding: 4px 8px;
@@ -222,13 +222,13 @@
 }
 
 .postId {
-  font-size: 11px;
+  font-size: 15px;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
   color: var(--text-muted);
 }
 
 .matchedAgency {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-secondary);
 }
 
@@ -237,7 +237,7 @@
 }
 
 .employmentTitle {
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -263,7 +263,7 @@
   th {
     text-align: left;
     padding: 8px 12px;
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -273,7 +273,7 @@
 
   td {
     padding: 8px 12px;
-    font-size: 12px;
+    font-size: 15px;
     color: var(--text-secondary);
     border-bottom: 1px solid var(--border-subtle);
   }
@@ -295,7 +295,7 @@
   padding: var(--spacing-lg);
   text-align: center;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 // ============================================================================
@@ -316,7 +316,7 @@
   padding: 10px 16px;
   border: 1.5px solid;
   border-radius: var(--radius-md);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -393,15 +393,11 @@
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-muted);
   cursor: pointer;
   transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-xs);
 
   &:hover {
     color: var(--text-secondary);
@@ -415,19 +411,6 @@
   }
 }
 
-.enrichedBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 9px;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: var(--radius-full);
-  background-color: rgba(59, 130, 246, 0.15);
-  color: #3b82f6;
-  margin-left: 4px;
-}
-
 .citationsContent {
   padding: var(--spacing-lg);
 }
@@ -438,6 +421,332 @@
   gap: var(--spacing-md);
 }
 
+// Case notes section
+.combinedNotesSection {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  gap: var(--spacing-lg);
+  align-items: stretch;
+}
+
+.combinedNotesField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.combinedNotesDivider {
+  width: 1px;
+  background-color: var(--border-subtle);
+  align-self: stretch;
+}
+
+// Keep for any legacy references
+.caseNotesSection {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.caseNotesSectionTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.caseNotesTextarea {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.5;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+}
+
+// Inline correction styles
+.editFieldButton {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  transition: color var(--transition-fast);
+
+  &:hover {
+    color: var(--accent-primary);
+  }
+}
+
+.correctionField {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.correctionInput {
+  flex: 1;
+  padding: 6px 10px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 15px;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.correctionSave {
+  padding: 5px 12px;
+  background-color: var(--accent-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--accent-hover);
+  }
+}
+
+.correctedBadge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+// Per-section notes
+.sectionNotesBlock {
+  margin-top: var(--spacing-md);
+}
+
+.sectionNotesLabel {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 6px;
+}
+
+.sectionNotesTextarea {
+  width: 100%;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.5;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+}
+
+// Custom citations
+.customCitationCard {
+  background-color: var(--bg-tertiary);
+  border: 1px dashed var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.customCitationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.customBadge {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.removeCitationButton {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-sm);
+
+  &:hover {
+    color: var(--error);
+  }
+}
+
+.customCitationQuote {
+  font-size: 15px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin: 0 0 6px 0;
+}
+
+.customCitationMeta {
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.addCitationButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--spacing-md);
+  padding: 6px 12px;
+  background: none;
+  border: 1px dashed var(--border-medium);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    background-color: rgba(20, 184, 166, 0.04);
+  }
+}
+
+.addCitationForm {
+  margin-top: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: var(--spacing-md);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+}
+
+.addCitationTextarea {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: vertical;
+  box-sizing: border-box;
+
+  &:focus { outline: none; border-color: var(--accent-primary); }
+  &::placeholder { color: var(--text-muted); }
+}
+
+.addCitationRow {
+  display: flex;
+  gap: 8px;
+}
+
+.addCitationInput {
+  flex: 1;
+  padding: 6px 10px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 15px;
+  box-sizing: border-box;
+
+  &:focus { outline: none; border-color: var(--accent-primary); }
+  &::placeholder { color: var(--text-muted); }
+}
+
+.addCitationInputSmall {
+  flex: 0 0 80px;
+}
+
+.addCitationActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.addCitationCancel {
+  padding: 5px 12px;
+  background: none;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 15px;
+  cursor: pointer;
+
+  &:hover { background-color: var(--bg-hover); }
+}
+
+.addCitationSave {
+  padding: 5px 12px;
+  background-color: var(--accent-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
+  &:not(:disabled):hover { background-color: var(--accent-hover); }
+}
+
 .noCitations {
   display: flex;
   flex-direction: column;
@@ -446,7 +755,7 @@
   gap: var(--spacing-sm);
   padding: var(--spacing-xl);
   color: var(--warning);
-  font-size: 13px;
+  font-size: 15px;
   text-align: center;
 
   svg {
@@ -460,7 +769,7 @@
 
 .documentLinkText {
   margin-top: 12px;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.5;
   color: var(--text-secondary);
 }
@@ -503,7 +812,7 @@
   padding: var(--spacing-md) var(--spacing-lg);
   background-color: var(--bg-tertiary);
   border: none;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
   cursor: pointer;
@@ -538,19 +847,19 @@
 }
 
 .disambiguationName {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .disambiguationPostId {
-  font-size: 11px;
+  font-size: 15px;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
   color: var(--text-muted);
 }
 
 .disambiguationTable {
-  // Table styles inherited from .tableContainer and .table
+  overflow: hidden;
 }
 
 // ============================================================================
@@ -621,28 +930,18 @@
   }
 }
 
-.dialogNotes {
-  width: 100%;
-  background-color: var(--bg-input);
+.dialogNotePreview {
+  font-size: 15px;
+  color: var(--text-secondary);
+  background-color: var(--bg-tertiary);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 10px 14px;
-  color: var(--text-primary);
-  font-size: 14px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  padding: 8px 12px;
+  margin: 0 0 var(--spacing-lg) 0;
   line-height: 1.5;
-  resize: vertical;
-  margin-bottom: var(--spacing-lg);
-  transition: border-color var(--transition-fast);
 
-  &::placeholder {
-    color: var(--text-placeholder);
-  }
-
-  &:focus {
-    outline: 2px solid rgba(20, 184, 166, 0.3);
-    outline-offset: 0;
-    border-color: var(--border-focus);
+  strong {
+    color: var(--text-primary);
   }
 }
 
@@ -656,7 +955,7 @@
 .dialogConfirmButton {
   padding: 10px 20px;
   border-radius: var(--radius-md);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-normal);
