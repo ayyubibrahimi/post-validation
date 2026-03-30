@@ -5,7 +5,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import ValidationHeader from '@/components/ValidationHeader';
 import OfficerDetail from '@/components/OfficerDetail';
+import ReviewerNameModal from '@/components/ReviewerNameModal';
 import styles from './DashboardContent.module.scss';
+
+const REVIEWER_NAME_KEY = 'reviewer_name';
+const DEFAULT_REVIEWER_NAME = 'Reviewer 1';
 
 /**
  * Dashboard Content - Client component with search params access
@@ -21,8 +25,27 @@ export default function DashboardContent() {
   // Get officer mention_uid from URL params
   const currentOfficerUid = searchParams.get('officer');
 
-  // Hardcoded validator ID (in production, this would come from auth/session)
-  const validatorId = 'validator_001';
+  // Reviewer name from localStorage (persists across sessions)
+  const [reviewerName, setReviewerName] = useState<string | null>(null);
+  const [showNameModal, setShowNameModal] = useState(false);
+
+  // Load reviewer name from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(REVIEWER_NAME_KEY);
+    if (stored && stored.trim()) {
+      setReviewerName(stored.trim());
+    } else {
+      setShowNameModal(true);
+    }
+  }, []);
+
+  const handleSaveReviewerName = (name: string) => {
+    localStorage.setItem(REVIEWER_NAME_KEY, name);
+    setReviewerName(name);
+    setShowNameModal(false);
+  };
+
+  const validatorId = reviewerName || DEFAULT_REVIEWER_NAME;
 
   // Track navigation history of viewed officers
   const [officerHistory, setOfficerHistory] = useState<string[]>([]);
@@ -163,9 +186,18 @@ export default function DashboardContent() {
 
   return (
     <div className={styles.dashboard}>
+      {/* Reviewer name modal - shown on first visit or when name is not set */}
+      {showNameModal && (
+        <ReviewerNameModal
+          defaultName={reviewerName || DEFAULT_REVIEWER_NAME}
+          onSave={handleSaveReviewerName}
+        />
+      )}
+
       {/* Top Header - Navigation, Progress, Stats, Actions */}
       <ValidationHeader
         validatorId={validatorId}
+        reviewerName={reviewerName}
         currentOfficerUid={currentOfficerUid}
         currentIndex={currentIndex}
         canGoBack={canGoBack}
@@ -174,6 +206,7 @@ export default function DashboardContent() {
         onNextInHistory={handleNextInHistory}
         onOfficerClaimed={handleOfficerClaimed}
         onOfficerReleased={handleOfficerReleased}
+        onChangeReviewerName={() => setShowNameModal(true)}
       />
 
       {/* Main Content - Officer Details with integrated actions */}

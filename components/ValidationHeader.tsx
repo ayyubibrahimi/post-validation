@@ -1,12 +1,13 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, XCircle, AlertTriangle, User } from 'lucide-react';
 import { useValidationStats, useQueueStatus, useClaimOfficer, useReleaseOfficer } from '@/hooks';
 import { toast } from 'sonner';
 import styles from './ValidationHeader.module.scss';
 
 interface ValidationHeaderProps {
   validatorId: string;
+  reviewerName: string | null;
   currentOfficerUid: string | null;
   currentIndex: number;
   canGoBack: boolean;
@@ -15,6 +16,7 @@ interface ValidationHeaderProps {
   onNextInHistory: () => void;
   onOfficerClaimed: (mentionUid: string) => void;
   onOfficerReleased: () => void;
+  onChangeReviewerName: () => void;
 }
 
 /**
@@ -27,6 +29,7 @@ interface ValidationHeaderProps {
  */
 export default function ValidationHeader({
   validatorId,
+  reviewerName,
   currentOfficerUid,
   currentIndex,
   canGoBack,
@@ -35,6 +38,7 @@ export default function ValidationHeader({
   onNextInHistory,
   onOfficerClaimed,
   onOfficerReleased,
+  onChangeReviewerName,
 }: ValidationHeaderProps) {
   const { data: stats, isLoading: statsLoading } = useValidationStats();
   const { data: queue, isLoading: queueLoading } = useQueueStatus(validatorId);
@@ -182,6 +186,16 @@ export default function ValidationHeader({
 
       {/* Right: Available Count + Actions */}
       <div className={styles.actions}>
+        {/* Reviewer name badge */}
+        <button
+          onClick={onChangeReviewerName}
+          className={styles.reviewerBadge}
+          title="Click to change your name"
+        >
+          <User size={14} />
+          <span>{reviewerName || 'Set name'}</span>
+        </button>
+
         <div className={styles.availableCount}>
           <div className={styles.count}>{queueLoading ? '—' : queue?.available || 0}</div>
           <div className={styles.countLabel}>Available</div>
@@ -193,7 +207,7 @@ export default function ValidationHeader({
             disabled={releaseOfficer.isPending}
             className={`${styles.actionButton} ${styles.releaseButton}`}
           >
-            Release Officer
+            Return to Queue
           </button>
         ) : (
           <button
