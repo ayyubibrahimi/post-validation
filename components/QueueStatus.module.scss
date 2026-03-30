@@ -37,7 +37,7 @@
 
 .loadingText {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .errorContainer {
@@ -50,7 +50,7 @@
 
 .errorText {
   color: var(--error);
-  font-size: 13px;
+  font-size: 15px;
   text-align: center;
 }
 
@@ -82,7 +82,7 @@
 }
 
 .countLabel {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-muted);
   font-weight: 500;
 }
@@ -108,7 +108,7 @@
 }
 
 .reviewingLabel {
-  font-size: 12px;
+  font-size: 15px;
   color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
@@ -133,7 +133,7 @@
 }
 
 .timerText {
-  font-size: 13px;
+  font-size: 15px;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', monospace;
   color: var(--text-muted);
 }
@@ -156,7 +156,7 @@
   border: none;
   border-radius: var(--radius-md);
   padding: 10px 20px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -189,7 +189,7 @@
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-md);
   padding: 10px 20px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -220,5 +220,5 @@
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: var(--radius-md);
   color: var(--error);
-  font-size: 13px;
+  font-size: 15px;
 }

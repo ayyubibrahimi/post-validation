@@ -21,7 +21,7 @@
 
 // Quote section
 .quote {
-  font-size: 12px;
+  font-size: 15px;
   line-height: 1.5;
   color: var(--text-secondary);
   margin-bottom: var(--spacing-sm);
@@ -78,7 +78,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  font-size: 11px;
+  font-size: 15px;
   color: var(--text-muted);
 }
 
@@ -100,7 +100,7 @@
 
 // Agency badge
 .agencyBadge {
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 600;
   padding: 3px 6px;
   border-radius: var(--radius-full);
@@ -113,7 +113,7 @@
 
 // Incident badge
 .incidentBadge {
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 600;
   padding: 3px 6px;
   border-radius: var(--radius-full);
@@ -126,7 +126,7 @@
 
 // Validator reasoning section (incident citations only)
 .reasoning {
-  font-size: 11px;
+  font-size: 15px;
   line-height: 1.4;
   color: var(--text-muted);
   padding: var(--spacing-xs) 0;
@@ -149,7 +149,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 11px;
+  font-size: 15px;
   color: var(--accent-primary);
   text-decoration: none;
   font-weight: 500;

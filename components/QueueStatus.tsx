@@ -182,7 +182,7 @@ export default function QueueStatus({
                 Releasing...
               </>
             ) : (
-              'Release Current Officer'
+              'Return to Queue'
             )}
           </button>
         )}
