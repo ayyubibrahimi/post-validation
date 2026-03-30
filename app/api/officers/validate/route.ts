@@ -27,7 +27,17 @@ export async function POST(request: NextRequest) {
   try {
     // Parse request body
     const body: ValidateOfficerRequest = await request.json();
-    const { mentionUid, validatorId, status, notes } = body;
+    const {
+      mentionUid,
+      validatorId,
+      status,
+      notes,
+      officer_match_notes,
+      agency_citation_notes,
+      incident_date_notes,
+      corrections,
+      custom_citations,
+    } = body;
 
     // Validate input
     if (!mentionUid || !validatorId || !status) {
@@ -78,7 +88,14 @@ export async function POST(request: NextRequest) {
         validated_by: validatorId,
         validated_at: new Date().toISOString(),
         notes: notes || null,
+        officer_match_notes: officer_match_notes || null,
+        agency_citation_notes: agency_citation_notes || null,
+        incident_date_notes: incident_date_notes || null,
       },
+      corrections: corrections
+        ? { ...corrections, corrected_by: validatorId, corrected_at: new Date().toISOString() }
+        : (currentOfficer.data.corrections || null),
+      custom_citations: custom_citations ?? currentOfficer.data.custom_citations ?? null,
     };
 
     // Update the officer with validation and release lock

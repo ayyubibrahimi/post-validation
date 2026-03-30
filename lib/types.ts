@@ -74,6 +74,29 @@ export interface IncidentCitation {
 }
 
 /**
+ * Reviewer corrections to extracted data points
+ */
+export interface OfficerCorrections {
+  incident_date?: string | null;      // Reviewer-corrected incident date (ISO YYYY-MM-DD)
+  employing_agency?: string | null;   // Reviewer-corrected employing agency
+  corrected_by?: string;
+  corrected_at?: string;
+}
+
+/**
+ * Custom citation added manually by a reviewer
+ */
+export interface CustomCitation {
+  type: 'agency' | 'incident';
+  quote: string;
+  file_name: string;
+  page_number: number;
+  url?: string;
+  added_by: string;
+  added_at: string;
+}
+
+/**
  * Validation metadata
  */
 export interface ValidationMetadata {
@@ -81,6 +104,9 @@ export interface ValidationMetadata {
   validated_by: string | null;
   validated_at: string | null;
   notes: string | null;
+  officer_match_notes?: string | null;
+  agency_citation_notes?: string | null;
+  incident_date_notes?: string | null;
 }
 
 /**
@@ -94,6 +120,10 @@ export interface OfficerValidationData {
   citations: Citation[];
   citation_count: number;
   validation: ValidationMetadata;
+
+  // Reviewer corrections and custom citations
+  corrections?: OfficerCorrections | null;
+  custom_citations?: CustomCitation[] | null;
 
   // Incident date fields (enriched data)
   csv_incident_date: string | null;
@@ -148,6 +178,11 @@ export interface ValidateOfficerRequest {
   validatorId: string;
   status: 'correct' | 'incorrect' | 'needs_review';
   notes?: string;
+  officer_match_notes?: string;
+  agency_citation_notes?: string;
+  incident_date_notes?: string;
+  corrections?: OfficerCorrections;
+  custom_citations?: CustomCitation[];
 }
 
 /**
