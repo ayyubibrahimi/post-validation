@@ -332,13 +332,13 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
             onClick={() => setActiveTab('incident')}
             className={`${styles.tab} ${activeTab === 'incident' ? styles.tabActive : ''}`}
           >
-            Incident Date ({(csv_citations?.length ?? 0) + customCitations.filter(c => c.type === 'incident').length})
+            Incident Date Citations ({(csv_citations?.length ?? 0) + customCitations.filter(c => c.type === 'incident').length})
           </button>
           <button
             onClick={() => setActiveTab('agency')}
             className={`${styles.tab} ${activeTab === 'agency' ? styles.tabActive : ''}`}
           >
-            Employing Agency ({citations.length + customCitations.filter(c => c.type === 'agency').length})
+            Employing Agency Citations ({citations.length + customCitations.filter(c => c.type === 'agency').length})
           </button>
         </div>
 
