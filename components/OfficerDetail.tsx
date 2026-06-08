@@ -19,14 +19,13 @@ interface OfficerDetailProps {
  * Layout:
  * 1. Side-by-side comparison (Input Officer | Match % | Matched POST Officer)
  * 2. Validation actions (Confirm/Reject/Needs Review)
- * 3. Tabbed citations (Agency | Incident Date)
+ * 3. Stacked citations (Incident Date, then Employing Agency)
  * 4. Collapsible disambiguation section
  */
 export default function OfficerDetail({ mentionUid, validatorId, onValidationComplete }: OfficerDetailProps) {
   const { data: officer, isLoading } = useOfficerDetail(mentionUid);
   const validateOfficer = useValidateOfficer();
 
-  const [activeTab, setActiveTab] = useState<'agency' | 'incident'>('incident');
   const [disambiguationOpen, setDisambiguationOpen] = useState(false);
 
   // Case notes (global)
@@ -325,127 +324,119 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
         </button>
       </div>
 
-      {/* Tabbed Citations */}
+      {/* Incident Date Citations */}
       <div className={styles.citationsSection}>
-        <div className={styles.citationsTabs}>
-          <button
-            onClick={() => setActiveTab('incident')}
-            className={`${styles.tab} ${activeTab === 'incident' ? styles.tabActive : ''}`}
-          >
-            Incident Date Citations ({(csv_citations?.length ?? 0) + customCitations.filter(c => c.type === 'incident').length})
-          </button>
-          <button
-            onClick={() => setActiveTab('agency')}
-            className={`${styles.tab} ${activeTab === 'agency' ? styles.tabActive : ''}`}
-          >
-            Employing Agency Citations ({citations.length + customCitations.filter(c => c.type === 'agency').length})
-          </button>
+        <div className={styles.citationsSectionHeader}>
+          Incident Date Citations ({(csv_citations?.length ?? 0) + customCitations.filter(c => c.type === 'incident').length})
         </div>
-
         <div className={styles.citationsContent}>
-          {activeTab === 'incident' && (
-            <div className={styles.citationsList}>
-              {csv_citations && csv_citations.length > 0 ? (
-                csv_citations.map((citation, index) => (
-                  <CitationCard key={index} citation={citation} type="incident" />
-                ))
-              ) : (
-                <div className={styles.noCitations}>
-                  <AlertTriangle size={24} />
-                  <p>No incident date citations available.</p>
-                  {officer_info.document_link && (
-                    <p className={styles.documentLinkText}>
-                      You can{' '}
-                      <a href={officer_info.document_link} target="_blank" rel="noopener noreferrer" className={styles.documentLink}>
-                        review the source documents here
-                        <ExternalLink size={14} className={styles.externalIcon} />
-                      </a>
-                      {' '}to look for relevant supporting data.
-                    </p>
-                  )}
+          <div className={styles.citationsList}>
+            {csv_citations && csv_citations.length > 0 ? (
+              csv_citations.map((citation, index) => (
+                <CitationCard key={index} citation={citation} type="incident" />
+              ))
+            ) : (
+              <div className={styles.noCitations}>
+                <AlertTriangle size={24} />
+                <p>No incident date citations available.</p>
+                {officer_info.document_link && (
+                  <p className={styles.documentLinkText}>
+                    You can{' '}
+                    <a href={officer_info.document_link} target="_blank" rel="noopener noreferrer" className={styles.documentLink}>
+                      review the source documents here
+                      <ExternalLink size={14} className={styles.externalIcon} />
+                    </a>
+                    {' '}to look for relevant supporting data.
+                  </p>
+                )}
+              </div>
+            )}
+            {customCitations.filter(c => c.type === 'incident').map((c, i) => (
+              <div key={`custom-incident-${i}`} className={styles.customCitationCard}>
+                <div className={styles.customCitationHeader}>
+                  <span className={styles.customBadge}>Added by {c.added_by}</span>
+                  <button className={styles.removeCitationButton} onClick={() => setCustomCitations(prev => prev.filter((_, idx) => !(prev[idx].type === 'incident' && prev.filter(x => x.type === 'incident').indexOf(prev[idx]) === i)))}><X size={12} /></button>
                 </div>
-              )}
-              {customCitations.filter(c => c.type === 'incident').map((c, i) => (
-                <div key={`custom-incident-${i}`} className={styles.customCitationCard}>
-                  <div className={styles.customCitationHeader}>
-                    <span className={styles.customBadge}>Added by {c.added_by}</span>
-                    <button className={styles.removeCitationButton} onClick={() => setCustomCitations(prev => prev.filter((_, idx) => !(prev[idx].type === 'incident' && prev.filter(x => x.type === 'incident').indexOf(prev[idx]) === i)))}><X size={12} /></button>
-                  </div>
-                  <p className={styles.customCitationQuote}>{c.quote}</p>
-                  <span className={styles.customCitationMeta}>{c.file_name}{c.page_number ? ` · Page ${c.page_number}` : ''}</span>
+                <p className={styles.customCitationQuote}>{c.quote}</p>
+                <span className={styles.customCitationMeta}>{c.file_name}{c.page_number ? ` · Page ${c.page_number}` : ''}</span>
+              </div>
+            ))}
+            {addingCitationFor === 'incident' ? (
+              <div className={styles.addCitationForm}>
+                <textarea value={newCitationQuote} onChange={(e) => setNewCitationQuote(e.target.value)} placeholder="Quote from document..." className={styles.addCitationTextarea} rows={3} autoFocus />
+                <div className={styles.addCitationRow}>
+                  <input type="text" value={newCitationFile} onChange={(e) => setNewCitationFile(e.target.value)} placeholder="File name" className={styles.addCitationInput} />
+                  <input type="number" value={newCitationPage} onChange={(e) => setNewCitationPage(e.target.value)} placeholder="Page #" className={`${styles.addCitationInput} ${styles.addCitationInputSmall}`} />
                 </div>
-              ))}
-              {addingCitationFor === 'incident' ? (
-                <div className={styles.addCitationForm}>
-                  <textarea value={newCitationQuote} onChange={(e) => setNewCitationQuote(e.target.value)} placeholder="Quote from document..." className={styles.addCitationTextarea} rows={3} autoFocus />
-                  <div className={styles.addCitationRow}>
-                    <input type="text" value={newCitationFile} onChange={(e) => setNewCitationFile(e.target.value)} placeholder="File name" className={styles.addCitationInput} />
-                    <input type="number" value={newCitationPage} onChange={(e) => setNewCitationPage(e.target.value)} placeholder="Page #" className={`${styles.addCitationInput} ${styles.addCitationInputSmall}`} />
-                  </div>
-                  <input type="url" value={newCitationUrl} onChange={(e) => setNewCitationUrl(e.target.value)} placeholder="Link to document (optional)" className={styles.addCitationInput} />
-                  <div className={styles.addCitationActions}>
-                    <button className={styles.addCitationCancel} onClick={() => setAddingCitationFor(null)}>Cancel</button>
-                    <button className={styles.addCitationSave} onClick={handleAddCustomCitation} disabled={!newCitationQuote.trim()}>Add Citation</button>
-                  </div>
+                <input type="url" value={newCitationUrl} onChange={(e) => setNewCitationUrl(e.target.value)} placeholder="Link to document (optional)" className={styles.addCitationInput} />
+                <div className={styles.addCitationActions}>
+                  <button className={styles.addCitationCancel} onClick={() => setAddingCitationFor(null)}>Cancel</button>
+                  <button className={styles.addCitationSave} onClick={handleAddCustomCitation} disabled={!newCitationQuote.trim()}>Add Citation</button>
                 </div>
-              ) : (
-                <button className={styles.addCitationButton} onClick={() => setAddingCitationFor('incident')}><Plus size={14} />Add Citation</button>
-              )}
-              <textarea value={incidentDateNotes} onChange={(e) => setIncidentDateNotes(e.target.value)} placeholder="Notes on incident date..." className={styles.sectionNotesTextarea} rows={2} />
-            </div>
-          )}
+              </div>
+            ) : (
+              <button className={styles.addCitationButton} onClick={() => setAddingCitationFor('incident')}><Plus size={14} />Add Citation</button>
+            )}
+            <textarea value={incidentDateNotes} onChange={(e) => setIncidentDateNotes(e.target.value)} placeholder="Notes on incident date..." className={styles.sectionNotesTextarea} rows={2} />
+          </div>
+        </div>
+      </div>
 
-          {activeTab === 'agency' && (
-            <div className={styles.citationsList}>
-              {citations.length > 0 ? (
-                citations.map((citation, index) => (
-                  <CitationCard key={index} citation={citation} type="agency" />
-                ))
-              ) : (
-                <div className={styles.noCitations}>
-                  <AlertTriangle size={24} />
-                  <p>No agency citations available.</p>
-                  {officer_info.document_link && (
-                    <p className={styles.documentLinkText}>
-                      You can{' '}
-                      <a href={officer_info.document_link} target="_blank" rel="noopener noreferrer" className={styles.documentLink}>
-                        review the source documents here
-                        <ExternalLink size={14} className={styles.externalIcon} />
-                      </a>
-                      {' '}to look for relevant supporting data.
-                    </p>
-                  )}
+      {/* Employing Agency Citations */}
+      <div className={styles.citationsSection}>
+        <div className={styles.citationsSectionHeader}>
+          Employing Agency Citations ({citations.length + customCitations.filter(c => c.type === 'agency').length})
+        </div>
+        <div className={styles.citationsContent}>
+          <div className={styles.citationsList}>
+            {citations.length > 0 ? (
+              citations.map((citation, index) => (
+                <CitationCard key={index} citation={citation} type="agency" />
+              ))
+            ) : (
+              <div className={styles.noCitations}>
+                <AlertTriangle size={24} />
+                <p>No agency citations available.</p>
+                {officer_info.document_link && (
+                  <p className={styles.documentLinkText}>
+                    You can{' '}
+                    <a href={officer_info.document_link} target="_blank" rel="noopener noreferrer" className={styles.documentLink}>
+                      review the source documents here
+                      <ExternalLink size={14} className={styles.externalIcon} />
+                    </a>
+                    {' '}to look for relevant supporting data.
+                  </p>
+                )}
+              </div>
+            )}
+            {customCitations.filter(c => c.type === 'agency').map((c, i) => (
+              <div key={`custom-agency-${i}`} className={styles.customCitationCard}>
+                <div className={styles.customCitationHeader}>
+                  <span className={styles.customBadge}>Added by {c.added_by}</span>
+                  <button className={styles.removeCitationButton} onClick={() => setCustomCitations(prev => prev.filter((_, idx) => !(prev[idx].type === 'agency' && prev.filter(x => x.type === 'agency').indexOf(prev[idx]) === i)))}><X size={12} /></button>
                 </div>
-              )}
-              {customCitations.filter(c => c.type === 'agency').map((c, i) => (
-                <div key={`custom-agency-${i}`} className={styles.customCitationCard}>
-                  <div className={styles.customCitationHeader}>
-                    <span className={styles.customBadge}>Added by {c.added_by}</span>
-                    <button className={styles.removeCitationButton} onClick={() => setCustomCitations(prev => prev.filter((_, idx) => !(prev[idx].type === 'agency' && prev.filter(x => x.type === 'agency').indexOf(prev[idx]) === i)))}><X size={12} /></button>
-                  </div>
-                  <p className={styles.customCitationQuote}>{c.quote}</p>
-                  <span className={styles.customCitationMeta}>{c.file_name}{c.page_number ? ` · Page ${c.page_number}` : ''}</span>
+                <p className={styles.customCitationQuote}>{c.quote}</p>
+                <span className={styles.customCitationMeta}>{c.file_name}{c.page_number ? ` · Page ${c.page_number}` : ''}</span>
+              </div>
+            ))}
+            {addingCitationFor === 'agency' ? (
+              <div className={styles.addCitationForm}>
+                <textarea value={newCitationQuote} onChange={(e) => setNewCitationQuote(e.target.value)} placeholder="Quote from document..." className={styles.addCitationTextarea} rows={3} autoFocus />
+                <div className={styles.addCitationRow}>
+                  <input type="text" value={newCitationFile} onChange={(e) => setNewCitationFile(e.target.value)} placeholder="File name" className={styles.addCitationInput} />
+                  <input type="number" value={newCitationPage} onChange={(e) => setNewCitationPage(e.target.value)} placeholder="Page #" className={`${styles.addCitationInput} ${styles.addCitationInputSmall}`} />
                 </div>
-              ))}
-              {addingCitationFor === 'agency' ? (
-                <div className={styles.addCitationForm}>
-                  <textarea value={newCitationQuote} onChange={(e) => setNewCitationQuote(e.target.value)} placeholder="Quote from document..." className={styles.addCitationTextarea} rows={3} autoFocus />
-                  <div className={styles.addCitationRow}>
-                    <input type="text" value={newCitationFile} onChange={(e) => setNewCitationFile(e.target.value)} placeholder="File name" className={styles.addCitationInput} />
-                    <input type="number" value={newCitationPage} onChange={(e) => setNewCitationPage(e.target.value)} placeholder="Page #" className={`${styles.addCitationInput} ${styles.addCitationInputSmall}`} />
-                  </div>
-                  <input type="url" value={newCitationUrl} onChange={(e) => setNewCitationUrl(e.target.value)} placeholder="Link to document (optional)" className={styles.addCitationInput} />
-                  <div className={styles.addCitationActions}>
-                    <button className={styles.addCitationCancel} onClick={() => setAddingCitationFor(null)}>Cancel</button>
-                    <button className={styles.addCitationSave} onClick={handleAddCustomCitation} disabled={!newCitationQuote.trim()}>Add Citation</button>
-                  </div>
+                <input type="url" value={newCitationUrl} onChange={(e) => setNewCitationUrl(e.target.value)} placeholder="Link to document (optional)" className={styles.addCitationInput} />
+                <div className={styles.addCitationActions}>
+                  <button className={styles.addCitationCancel} onClick={() => setAddingCitationFor(null)}>Cancel</button>
+                  <button className={styles.addCitationSave} onClick={handleAddCustomCitation} disabled={!newCitationQuote.trim()}>Add Citation</button>
                 </div>
-              ) : (
-                <button className={styles.addCitationButton} onClick={() => setAddingCitationFor('agency')}><Plus size={14} />Add Citation</button>
-              )}
-              <textarea value={agencyCitationNotes} onChange={(e) => setAgencyCitationNotes(e.target.value)} placeholder="Notes on employing agency..." className={styles.sectionNotesTextarea} rows={2} />
-            </div>
-          )}
+              </div>
+            ) : (
+              <button className={styles.addCitationButton} onClick={() => setAddingCitationFor('agency')}><Plus size={14} />Add Citation</button>
+            )}
+            <textarea value={agencyCitationNotes} onChange={(e) => setAgencyCitationNotes(e.target.value)} placeholder="Notes on employing agency..." className={styles.sectionNotesTextarea} rows={2} />
+          </div>
         </div>
       </div>
 
