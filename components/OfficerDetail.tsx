@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Lock, AlertTriangle, Loader2, ArrowRight, ChevronDown, ChevronUp, CheckCircle, XCircle, Eye, ExternalLink, Pencil, Plus, X } from 'lucide-react';
+import { Lock, AlertTriangle, Loader2, ArrowRight, ChevronDown, ChevronUp, CheckCircle, XCircle, Eye, Pencil, Plus, X } from 'lucide-react';
 import { useOfficerDetail, useValidateOfficer } from '@/hooks';
 import CitationCard from './CitationCard';
 import type { EmploymentHistory, CustomCitation } from '@/lib/types';
@@ -60,7 +60,7 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
         <ArrowRight size={48} className={styles.emptyIcon} />
         <h2 className={styles.emptyTitle}>Ready to Begin</h2>
         <p className={styles.emptyDescription}>
-          Click "Next Officer" in the sidebar to start validating officer matches
+          Select an officer from the list on the left to start validating matches
         </p>
       </div>
     );
@@ -339,16 +339,6 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
               <div className={styles.noCitations}>
                 <AlertTriangle size={24} />
                 <p>No incident date citations available.</p>
-                {officer_info.document_link && (
-                  <p className={styles.documentLinkText}>
-                    You can{' '}
-                    <a href={officer_info.document_link} target="_blank" rel="noopener noreferrer" className={styles.documentLink}>
-                      review the source documents here
-                      <ExternalLink size={14} className={styles.externalIcon} />
-                    </a>
-                    {' '}to look for relevant supporting data.
-                  </p>
-                )}
               </div>
             )}
             {customCitations.filter(c => c.type === 'incident').map((c, i) => (
@@ -397,16 +387,6 @@ export default function OfficerDetail({ mentionUid, validatorId, onValidationCom
               <div className={styles.noCitations}>
                 <AlertTriangle size={24} />
                 <p>No agency citations available.</p>
-                {officer_info.document_link && (
-                  <p className={styles.documentLinkText}>
-                    You can{' '}
-                    <a href={officer_info.document_link} target="_blank" rel="noopener noreferrer" className={styles.documentLink}>
-                      review the source documents here
-                      <ExternalLink size={14} className={styles.externalIcon} />
-                    </a>
-                    {' '}to look for relevant supporting data.
-                  </p>
-                )}
               </div>
             )}
             {customCitations.filter(c => c.type === 'agency').map((c, i) => (

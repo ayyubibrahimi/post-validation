@@ -21,10 +21,19 @@ import type { ValidationStats } from '@/lib/types';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Fetch all officers with their validation status
-    const { data: officers, error } = await supabase
+    // Scope stats to a reviewer's assigned set when validatorId is provided,
+    // so the progress bar reads x/50 rather than across the whole table.
+    const { searchParams } = new URL(request.url);
+    const validatorId = searchParams.get('validatorId');
+
+    let query = supabase
       .from('officer_validations')
       .select('data, being_reviewed_by');
+    if (validatorId) {
+      query = query.eq('assigned_to', validatorId);
+    }
+
+    const { data: officers, error } = await query;
 
     if (error) {
       console.error('Error fetching stats:', error);

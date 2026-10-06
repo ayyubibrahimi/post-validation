@@ -60,21 +60,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // First, fetch the current officer to get the existing data
+    // Fetch the current officer by mention_uid. There is no claiming/locking:
+    // each reviewer owns a distinct set of rows, so ownership is implied by the
+    // assignment rather than a runtime lock.
     const { data: currentOfficer, error: fetchError } = await supabase
       .from('officer_validations')
       .select('*')
       .eq('mention_uid', mentionUid)
-      .eq('being_reviewed_by', validatorId)
       .single();
 
     if (fetchError || !currentOfficer) {
       return NextResponse.json(
         {
           success: false,
-          message: currentOfficer
-            ? 'Officer not found or not locked by this validator'
-            : `Database error: ${fetchError?.message}`,
+          message: `Officer not found${fetchError ? `: ${fetchError.message}` : ''}`,
         },
         { status: 404 }
       );
@@ -98,7 +97,7 @@ export async function POST(request: NextRequest) {
       custom_citations: custom_citations ?? currentOfficer.data.custom_citations ?? null,
     };
 
-    // Update the officer with validation and release lock
+    // Persist the validation (also clears any legacy lock fields as a no-op).
     const { data: updatedOfficer, error: updateError } = await supabase
       .from('officer_validations')
       .update({
@@ -108,7 +107,6 @@ export async function POST(request: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq('mention_uid', mentionUid)
-      .eq('being_reviewed_by', validatorId)
       .select()
       .single();
 

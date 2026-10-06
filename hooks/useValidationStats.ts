@@ -28,11 +28,14 @@ import type { ValidationStats } from '@/lib/types';
  * );
  * ```
  */
-export function useValidationStats() {
+export function useValidationStats(validatorId?: string) {
   return useQuery<ValidationStats, Error>({
-    queryKey: ['validationStats'],
+    queryKey: ['validationStats', validatorId ?? null],
     queryFn: async () => {
-      const response = await fetch('/api/officers/stats');
+      const url = validatorId
+        ? `/api/officers/stats?validatorId=${encodeURIComponent(validatorId)}`
+        : '/api/officers/stats';
+      const response = await fetch(url);
 
       if (!response.ok) {
         const errorData = await response.json();
