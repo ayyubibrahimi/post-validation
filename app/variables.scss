@@ -73,6 +73,12 @@ $font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', 
   --success: #22c55e;
   --warning: #f59e0b;
   --error: #ef4444;
+
+  // Field comparison (extracted vs POST): agree / clearly disagree
+  --ok-soft: #dcfce7;
+  --ok-text: #166534;
+  --bad-soft: #fee2e2;
+  --bad-text: #991b1b;
   --info: #3b82f6;
 
   // ========================================

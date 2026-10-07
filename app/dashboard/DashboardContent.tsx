@@ -59,6 +59,25 @@ export default function DashboardContent() {
     [router, searchParams]
   );
 
+  // Keyboard: j / k move to the next / previous officer in the list. Ignored while
+  // typing or with a modifier. (1 / 2 / 3 verdicts live in OfficerDetail.)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key !== 'j' && e.key !== 'k') return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName))) return;
+      const list = officers ?? [];
+      if (list.length === 0) return;
+      const idx = list.findIndex((o) => o.mention_uid === currentOfficerUid);
+      const nextIdx =
+        idx === -1 ? 0 : Math.min(Math.max(idx + (e.key === 'j' ? 1 : -1), 0), list.length - 1);
+      if (nextIdx !== idx) handleSelect(list[nextIdx].mention_uid);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [officers, currentOfficerUid, handleSelect]);
+
   /**
    * Switch the active reviewer: persist, clear the current officer (it belongs
    * to the other reviewer's set). The list/stats hooks are keyed by validatorId
@@ -115,6 +134,7 @@ export default function DashboardContent() {
 
         <main className={styles.mainContent}>
           <OfficerDetail
+            key={currentOfficerUid ?? 'none'}
             mentionUid={currentOfficerUid}
             validatorId={validatorId}
             onValidationComplete={handleValidationComplete}
