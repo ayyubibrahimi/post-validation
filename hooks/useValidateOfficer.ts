@@ -60,8 +60,8 @@ export function useValidateOfficer() {
       // Invalidate validation stats (total counts, success rate)
       queryClient.invalidateQueries({ queryKey: ['validationStats'] });
 
-      // Invalidate queue status (available count, yourOfficer state)
-      queryClient.invalidateQueries({ queryKey: ['queueStatus'] });
+      // Refresh the sidebar list so status badges update after a save
+      queryClient.invalidateQueries({ queryKey: ['officerList'] });
 
       // Update the specific officer in cache with new validation status
       queryClient.setQueryData(
